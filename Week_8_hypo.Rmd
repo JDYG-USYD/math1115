@@ -1,0 +1,288 @@
+---
+title: "Hypothesis Testing"
+output: rmdformats::robobook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+```
+
+# Summary
+
+Hypothesis testing is a scientific method for weighing up the evidence given in the data against a given hypothesis. There are 3 main steps and 5 "sub-steps" (i.e. H A T P C):
+
+1. Set up a research question. 
+
+    - **H**: Hypothesis (H~0~ vs H~1~)
+
+    - The null hypothesis (H~0~) assumes that the difference between the observed and the expected is due to chance alone. 
+
+    - The alternative hypothesis (H~1~) assumes that the difference between the observed and the expected is **not** due to chance.
+
+2. Weigh up evidence
+
+    - **A**: Assumptions (needed to be stated and justified for a transparent and valid conclusion)
+
+    - **T**: Test Statistic (e.g. *t*, *F*)
+
+    - **P**: P-value - a way of weighing up whether the sample is consistent with H~0~ (For example: The chance of observing the test statistic **if H~0~ is really true**)
+    
+3. Explain the conclusion
+
+    - **C**: Conclusion. 
+
+Three Chi-squared tests: Goodness of Fit (GoF), Homogeneity and Independence. 
+
+$$\chi^2 = \sum \frac {(O - E)^2}{E}$$
+
+- **GoF**: Test a hypothesis about the distribution of a qualitative variable in a population
+
+- **Homogeneity**: Test a hypothesis about the distribution of a qualitative variable in several populations (extension, not tested).
+
+- **Independence**: Test a hypothesis about the relationship between two qualitative variables in a population. 
+
+Note that the only difference between the GoF and Independence test is the way the degrees of freedom are calculated. 
+
+# Demo
+
+## T-test (two-sample)
+
+Sugar is a major ingredient in many breakfast cereals. The data gives the sugar content as a percentage of weight for 49 brands of cereal. Data were collected from nutrition labels in a supermarket.
+
+Not surprisingly, sugar is a major component of many breakfast cereals. The dataset that we are working with today was collected from the cereal aisle at Coles. Specifically, it looks at nutrition labels and records the sugar content as a *percentage* of the total weight. A total of 49 brands of cereal were recorded and divided into their two target groups: Children's cereals and adult's cereals. 
+
+The data is supplied as a text file -- we can use the `read_table()` function to parse the text into a data frame.
+
+```{r, message=FALSE}
+cereal <- read_table("data/sugar-in-cereal.txt")
+glimpse(cereal)
+```
+
+> **Research question**: Is there a difference in sugar content (by %) between children and adult cereals?
+
+**Hypotheses:**
+
+- $H_0$: Mean sugar content by % is equal between children and adult cereals.
+
+- $H_1$: Mean sugar content by % is *not equal* between children and adult cereals.
+
+**Assumptions:**
+
+- Groups are normally distributed
+
+- Equal variances between groups, and the distribution is symmetric
+
+To test for normality, we can use a QQ-plot.
+
+```{r}
+par(mfrow = c(1, 2)) # How plots are displayed
+
+# children's
+qqnorm(cereal$Childrens_Cereal, main = "Children cereals")
+qqline(cereal$Childrens_Cereal)
+
+# adult's
+qqnorm(cereal$Adults_Cereals, main = "Adult cereals")
+qqline(cereal$Adults_Cereals)
+```
+
+To test for equal variances, viewing the boxplot of the groups is normally sufficient, since the Welch test (assumes non-equal variances) can be applied as soon as if we doubt that this assumption is not met.
+
+```{r}
+par(mfrow = c(1, 2))
+boxplot(cereal$Childrens_Cereal, main = "Children cereals")
+boxplot(cereal$Adults_Cereals, main = "Adult cereals")
+```
+
+Alternatively, we could use the package `ggfortify`, perform a linear model of the data and plot the residuals.
+
+```{r}
+library(ggfortify)
+cereal %>%
+  pivot_longer(cols = 1:2) %>%
+  lm(value ~ name, data = .) %>%
+  autoplot(which = 1:2)
+```
+
+
+Variances are equal, judging from the distributions of the two groups.
+We will perform `t.test()` with `var.equal = TRUE`.
+
+```{r}
+t.test(cereal$Childrens_Cereal, cereal$Adults_Cereals, var.equal = TRUE)
+```
+
+**Test statistic** is 17.2 and the **p-value** is < 0.001. Thus at a 0.05 level of significance, we can reject the null hypothesis and **conclude** from the available evidence that the mean sugar content between the two groups are *not equal*.
+
+How do we put the results into *context*? Calculate the mean values and specify the difference. The output of the next code chunk is hidden as we will print the results directly in the main text.
+
+```{r, results=FALSE}
+children <- round(mean(cereal$Childrens_Cereal, na.rm = TRUE), 1)
+adult <- round(mean(cereal$Adults_Cereals), 1)
+```
+
+*Within context (check source code for in-line code)*: Based on the evidence the two groups are significantly different and the mean sugar content in adult cereal at `r adult`% is `r round(children/adult, 1)` times less than the mean sugar content in children cereal at `r children`%.
+
+## Linear regression test
+
+We will use the same `Olympic100m.csv` dataset from the previous 2 labs. You should already know how to perform the diagnostic tests for the assumptions of a linear model, so we focus on the hypothesis testing results in this demo.
+
+```{r}
+olym <- read_csv("data/Olympics100m.csv", show_col_types = FALSE)
+
+fit <- olym %>%
+  filter(Gender == "male") %>%
+  lm(Time ~ Year, data = .)
+summary(fit)
+```
+
+We look at the predictor variable term or the $\beta_1$ term (in this case, `Year`) to assess the results of the hypothesis test. 
+
+**Hypotheses:**
+
+- $H_0$: $\beta_1 = 0$ or there is no linear relationship between Time and Year
+
+- $H_1$: $\beta_1 \neq 0$ or there is a linear relationship between Time and Year
+
+**Assumptions:**
+
+- Normally distributed residuals (testable)
+
+- Homoscedasticity  in residuals (i.e. equal variances, testable)
+
+These should also be assumed, although not formally tested:
+
+- Relationship between the 2 variables are thought to be linear (by past observation or domain knowledge)
+
+- independence between samples
+
+You've done these test before. What were they?
+
+```{r}
+autoplot(fit, which = 1:2)
+```
+
+
+**Test statistic** is -11.5 and the **p-value** is < 0.001. Thus at a 0.05 level of significance, we can reject the null hypothesis and **conclude** from the available evidence that there is a linear relationship between Time and Year.
+
+**Within context**: There is strong evidence to suggest that the gold medal record time has been *decreasing* at the Olympics over time.
+
+## Chi-squared test
+
+We will use data from the `MASS` package. This package should come automatically with the tidyverse install.
+
+```{r}
+library(MASS)
+```
+
+Note that loading the `MASS` package after the `tidyverse` will mask the `select()` function i.e. by default, `select()` will choose the function from `MASS` over `dplyr`. This can cause issues when you use the `select()` function after this package has been loaded.
+
+The easiest way to reverse this is to change the order in which the packages are loaded, i.e. use `library(MASS)` before `library(tidyvrse)`. Alternatively, call the `dplyr` package whenever you use `select()` from now on i.e. `dplyr::select()`.
+
+### Chi-square test of Independence
+
+The `Aids2` data was collected before July 1991 and contains data on patients diagnosed with AIDS. Use `?Aids2` for the domain knowledge to the data.
+
+```{r}
+glimpse(Aids2)
+```
+
+
+> Research question: Is status (alive or dead at end of observation) independent of State?
+
+
+Using HATPC:
+
+**Hypotheses:**
+
+- $H_0$: There is no association between `status` and `state`; or, `status` is independent of `state`.
+
+- $H_1$: `status` is associated with `state`; or status` is not independent of `state`.
+
+
+**Assumptions:**
+
+- data are collected independently
+
+- no *expected* cell counts are less than 5 (where a cell is a value in a contingency table created from the data)
+
+We can create a contingency table using the `table()` function, and then run the test on the table.
+
+```{r}
+chisq.test(table(Aids2$state, Aids2$status))
+```
+
+Test statistic is 4.8 and p-value is 0.19. At the 5% level of confidence, the null hypothesis is retained since p > 0.05. Thus, we conclude that a patient's status is independent of which state that they are in.
+
+### Chi-square Goodness-of-fit test
+
+> Research question: Is there a gender disparity in the proportion of Aids patients in the Aids2 data? *Or, is the proportion of male to females equal in the Aids2 data?*
+
+An interesting research question! We prepare the data using the tidyverse. (Alternatively, we can use the `table()` function like above.)
+
+```{r}
+gender <- Aids2 %>%
+  group_by(sex) %>%
+  count()
+
+gender
+```
+
+**Hypotheses:**
+
+- $H_0$: `sex` follows a distribution ratio of 1:1
+
+- $H_1$: `sex` does no follow a distribution ratio of 1:1
+
+```{r}
+observed <- gender$n
+observed
+expected <-  c(.5, .5)
+expected
+```
+
+**Assumptions**
+
+Quickly check the assumptions on the expected cell counts: 
+
+```{r}
+sum(observed) * expected
+```
+
+Then perform the test:
+
+```{r}
+mychisq <- chisq.test(observed, p = expected)
+mychisq
+```
+
+Test statistic is 2498 and p-value is < 0.01. At the 5% level of confidence, the null hypothesis is rejected since p < 0.05 and we conclude from the evidence that `sex` does not follow a distribution ratio of 1:1.
+
+*Within context*: We conclude that the male to female ratio in the dataset provided is not equal, which is clear when we calculate the ratio ourselves -- the observed male:female ratio is approximately `r round(mychisq$observed[2]/mychisq$observed[1], 0)`:1.
+
+# Explore
+
+## T-test (one-way) -- Chips ahoy!
+
+In 1998, as an advertising campaign, the Nabisco Company announced a “1000 Chips Challenge,” claiming that every 18-ounce bag of their Chips Ahoy! cookies contained at least 1,000 chocolate chips. Dedicated statistics students at the US Air Force Academy randomly selected bags of cookies and counted the chocolate chips. The data report their counts. 
+
+```{r, emessage=FALSE}
+chips <- read_table("data/chips.txt")
+```
+
+A one-way t-test can be performed by comparing a single group means with an expected value. 
+
+```{r}
+t.test(chips$Chips, mu = 1000, alternative = "greater")
+```
+
+Read the code and output above. Then use HATPC to analyse the data.
+
+## Chi-squared tests
+
+- Consider the qualitative variables in past data stories. 
+
+- Pose some research questions which could be answered by a chi-squared test.
+
+- Perform the test.

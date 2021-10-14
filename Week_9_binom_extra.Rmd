@@ -1,0 +1,142 @@
+---
+title: "DATA1001/1901 Topic 6"
+subtitle: "Understanding Chance"
+author: "© University of Sydney 2021"
+output:
+  html_document:
+    code_download: true # embed .Rmd file
+    toc: true  # table of contents
+    toc_depth: 3
+    toc_float: true # toc is always visible when scrolled
+    number_sections: true 
+    theme: sandstone # theme the doc
+    highlight: tango # theme syntax colouring
+---
+
+
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+h3 { /* Resize header 2: */
+  font-size: 18px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+}
+
+```
+
+*Note that this document has been updated in 2021 and may look slightly different from the lab videos.*
+
+
+# Live Demo
+
+We will demonstrate simulation of simple scenarios, including a simple game.
+
+## Simulation
+
+```{r}
+set.seed(1)  # This ensures the same simulation, "1" can be whatever you choose
+
+# Simulate 1 fair coin toss
+sample(c("H", "T"), 1, replace = TRUE)
+
+# Simulate 1 biased coin toss
+sample(c("H", "T"), 1, replace = TRUE, prob = c(0.9, 0.1))
+
+# Simulate 10 fair coin tosses, and summarise chances in a table.
+
+## Option1
+sample1 <- sample(c("H", "T"), 10, replace= TRUE)
+table(sample1)/10
+
+## Option 2
+sample2 <- replicate(10, sample(c("H", "T"), 1, replace = TRUE))
+table(sample2) / 10
+
+## Option 3
+sample3 <- rbinom(n = 10, 1, 0.5)
+table(sample3) / 10
+```
+
+## Using binomial function
+
+Suppose we have 10 trials with P(event) = 0.3.
+
+```{r}
+# The chance of getting 4 events is:
+dbinom(4,10,0.3)  # dbinom(x,n,p)
+
+# The chance of getting less than or equal to 5 events is:
+pbinom(5,10,0.3)    # pbinom(x,n,p)
+```
+
+What are the differences between this week's functions to last week's `dnorm()` and `pnorm()`?  
+
+# Have a go
+
+## Dice
+
+Here's the rules of a game:
+
+- A game costs $50 to play. 
+- You get to roll a fair dice 20 times.
+- You get \$8 for any roll that produces a 6.
+
+Simulate your net win/loss.
+
+```{r}
+# Simulate the 20 throws of the fair dice
+set.seed(100)
+sample3 <- sample(c(1:6), 20, replace = TRUE) # why is replace set to TRUE?
+
+table(sample3) # preview data
+
+# plot
+library(ggplot2) # alternative: library(tidyverse)
+ggplot() +
+  geom_bar(aes(factor(sample3)),# why did we do this? Try removing factor()
+           colour = "white", 
+           fill = "firebrick") +
+  xlab("Rolled number on dice") +
+  ylab("Frequency") +
+  ggtitle("Simulation of 20 throws of fair dice") + 
+  theme_bw() # try theme_minimal() and theme_gray()
+  
+```
+
+
+Conclusion: Based on this simulation, your net loss would be $\$8 \times 5 - \$50 = - \$10$.
+
+
+## Coins
+
+Here's the rules of another game:
+
+- A game costs $10 to play. 
+- You get to throw a biased coin 5 times, where the probability of getting a head is 0.2. 
+- You get $20 for each Head you thow. 
+
+Simulate your net win/loss.
+
+```{r}
+# Simulate the 5 throws of the biased dice
+```

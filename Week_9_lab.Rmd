@@ -1,0 +1,323 @@
+---
+title: "Binomial Formula"
+output: rmdformats::robobook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(multicon)
+```
+
+# Summary
+
+Todo:
+
+- Box model
+- Use the Binomial Formula to model chance
+
+A binary trial is where only two things can occur, so, *P*(event) = *p* and *P*(non-event) = 1 - *p*. 
+
+- If we have *n* independent, binary trials, with *P*(event) = *p* at every trial, and *n* is fixed; the chance that exactly *k* events occur is 
+
+$$\binom{n}{k}p^x(1-p)^{n-x}$$
+
+- Two things are mutually exclusive when the occurrence of one event prevents the other.
+
+## Box Model
+
+- The box model is a simple way to describe the chance of generating a number. Three things are needed:
+
+    1. The distinct numbers that go in the box ("tickets")
+    2. The number of each kind of tickets in the box
+    3. The number of draws from the box. 
+
+- **Sum** of the random draws from a box model with replacement:
+
+$$expected~value~(EV) = number~of~draws \times mean~of~the~box$$
+
+$$standard~error~(SE) = \sqrt{number~of~draws} \times SD~of~box$$
+
+- For the **percentage** of the box (Sum / Sample size):
+
+$$EV~(percentage) = \frac {EV~(sum)}{sample~size} \times 100\%$$
+$$SE~(percentage) = \frac {SE~(sum)}{sample~size} \times 100\%$$
+
+## Central Limit Theorem
+
+When drawing (a reasonably large number) at random with replacement from a box, the probability histogram (in standard units) for the sum (or average) will follow the normal curve. 
+
+# The Box Model
+
+1. What does the "box model" model?
+
+- The chance of generating a number. 
+
+- To build the model we need to know:
+    - the distinct numbers that go in the box ("tickets")
+    - the number of each kind of tickets in the box
+    - the number of **draws** from the box. 
+
+2. Suppose we have a box with 10 1's and 5 0's. We take 20 draws (with replacement) and calculate the sum. What is the mean and standard deviation (SD) of the box?
+
+```{r}
+# box
+box <- c(rep(1,10),rep(0,5)) 
+draws <-  20
+
+# mean and SD of box
+mean(box)
+popsd(box) #how is popsd() different from sd()? 
+```
+
+3. What is the expected value (EV) and standard error (SE) of the **sum** of 1's in the sample?
+
+```{r}
+# EV and SE of sum of the box
+
+# EV = number of draws * mean of box
+EVs <- draws*mean(box)
+
+# SE = sqrt(number of draws) * SD of box
+SEs <- sqrt(draws)*popsd(box)
+c(EVs,SEs)
+```
+
+4. What is the expected value (EV) and standard error (SE) of the **proportion** of 1's in the sample?
+
+```{r}
+# EV = mean of box
+EVp <- mean(box)
+# SE = SD of box /sqrt(number of draws)
+SEp <- popsd(box)/sqrt(draws)
+c(EVp,SEp)
+```
+
+5. What is the shape of the sum and proportion of the 1's in the box, with 20 draws?
+
+```{r}
+set.seed(10)
+data.frame(sum = replicate(20, sum(sample(box, 20, rep = T)))) %>% 
+  ggplot(., aes(sum)) + 
+  geom_histogram(bins = 10, fill = "lightgrey") + 
+  labs(x = "", y = "") + 
+  theme_bw()
+```
+
+6. If we take a larger number of draws (1000), what shape do we expect the distribution of the sum or proportion to have? What theorem formalizes this result? Demonstrate by simulation.
+
+```{r}
+set.seed(10)
+data.frame(sum = replicate(20, sum(sample(box, 1000, rep = T)))) %>% 
+  ggplot(., aes(sum)) + 
+  geom_histogram(bins = 20, fill = "lightgrey") + 
+  labs(x = "", y = "") + 
+  theme_bw()
+```
+
+# Spotify 
+
+## Data Collection (Song List)
+Imagine that you have 10 song in a Spotify list. Identify them by 1 to 10.
+
+## Shuffle
+In how many different ways could Spotify shuffle this list?
+
+```{r}
+factorial(10)
+```
+
+## 2 Songs (With Replacement)
+Spotify randomly plays 2 songs, with replacement.
+
+1. How many different play lists are there?
+
+```{r}
+10*10
+```
+
+2. What is the chance of getting a **certain** song twice?
+
+```{r}
+1/(10*10)
+```
+
+3. What is the chance of getting **any** song twice?
+
+```{r}
+1*1/(10)
+```
+
+4. Simulate Q3.
+
+```{r}
+set.seed(2)
+songs <- c(1:10)
+replicate(10000, sample(songs, 2, replace = T)) %>%
+  which(x = .[1,] == .[2,]) %>%
+  length/10000
+```
+
+5. What is the chance of not getting a song twice?
+
+6. What is the chance of getting a certain song twice, given it was the 1st song? 
+7. Which of the previous events are independent, dependent or mutually exclusive?
+
+8. Would Spotify be likely to draw with replacement?
+
+## 2 Songs (Without Replacement)
+Spotify randomly plays 2 songs, without replacement.
+
+1. How many different play lists are there?
+
+```{r}
+10*9
+```
+
+2. What is the chance of getting your favorite play list?
+
+```{r}
+1/(10*9)
+```
+
+3. What is the chance of getting a certain song twice? Are these events independent, dependent or mutually exclusive?
+
+```{r}
+0
+```
+
+4. Simulate this situation.
+
+```{r}
+set.seed(2)
+songs <- c(1:10)
+replicate(10000, sample(songs, 2, replace = F)) %>%
+  which(x = .[1,] == .[2,]) %>%
+  length/10000
+```
+
+## 3 Songs (Without Replacement)
+Spotify randomly plays 3 songs, without replacement.
+
+1. If the order matters, how many different playlists are there?
+
+```{r, eval=FALSE}
+10*9*8
+```
+
+2. If the order doesn't matter, how many different playlists are there?
+
+```{r, eval=FALSE}
+choose(10,3) # Which is 10*9*8/factorial(3)
+```
+
+3. If order doesn't matter, what is the chance of getting a particular favorite playlist?
+
+4. Assuming each playlist takes 10 minutes, how long would it take to play all possible playlists (in hours)?
+
+## Artist
+
+Consider your playlist in terms of whether the artist is Australian (Y or N). 
+
+1. If Spotify randomly chooses 1 song from your list, what is the chance that the artist is Australian?
+
+For mine, it is actually 0, but let's say if it is 0.4.
+
+2. If Spotify randomly chooses 8 songs from your list (with replacement), what is the chance that just 1 of the artists are Australian?
+
+```{r, eval=FALSE}
+choose(8,1)*(0.4)^1*(0.6)^7 # If P(Australian) = 0.4
+dbinom(1,8,0.4)
+```
+
+3. Simulate Q2.
+
+```{r, eval=FALSE}
+songs <- c(1,0)  # where "1" = Australian
+replicate(1000, sum(sample(songs, 8, replace = T, prob = c(0.4, 0.6)))) %>%
+  table(.)/1000
+```
+
+4. If Spotify randomly chooses 5 songs from your list (with replacement), what is the chance that no artists are Australian?
+
+## iTunes
+
+How does iTunes shuffle it's playlists?
+[Resource](https://www.lifewire.com/is-itunes-shuffle-random-1999249)
+
+Extension: 
+[Spotify and Data](https://www.safaribooksonline.com/library/view/strata-data-conference/9781491976326/video314445.html?utm_source=oreilly&utm_medium=newsite&utm_campaign=strata-ny-17-keynote-highlight-music-the-window-into-your-soul)
+
+# Coke 
+
+## Data Collection
+
+Imagine that this is the data for your class:
+
+```{r}
+data.frame("Preferred soft drink" = c("Coke", "Pepsi", "Other", "Total"),
+           Frequency = c(30, 18, 12, 60))
+```
+
+
+## Domain Knowledge
+- According to [past research](http://money.cnn.com/2018/02/20/news/companies/cola-wars-coke-pepsi/index.html), what market share does Coke have?
+
+## Using Binomial
+1. Modelling by the Binomial, how many students would you expect to prefer Coke in this class
+
+```{r, eval=FALSE}
+n <- 
+p <- 
+n*p
+```
+
+2. Modelling by the Binomial, what is the chance that greater or equal to half the students prefer Coke?
+
+```{r, eval=FALSE}
+n <- 
+p <- 
+1-pbinom(n/2-1,n,p)
+```
+
+# iPhones 
+
+## Data Collection
+
+Fill out the following table for your class:
+
+|Preferred mobile phone|Frequency|
+|--------------|------------|
+|iPhone||
+|non-iPhone||
+|Total||
+
+```{r}
+data.frame("Preferred mobile phone" = c("iPhone", "non-iPhone", "Total"),
+           Frequency = c(35, 25, 60))
+```
+
+
+## Domain Knowledge
+- According to [past research](https://www.crn.com.au/news/iphones-market-share-begins-to-slide-report-479248), what market share does iPhone have in the US?
+
+## Using Binomial
+1. Modelling by the Binomial, how many students would you expect to use an iPhone in this class?
+
+```{r, eval=FALSE}
+n <- 
+p <- 
+n*p
+```
+
+2. What are our assumptions?
+
+- The levels of the variable are mutually exclusive (e.g. most students would have either an iPhone *or* another brand, not an iPhone *and* another brand)
+
+3. Modelling by the Binomial, what is the chance that less than or equal of 25% students use iPhones?
+
+```{r, eval=FALSE}
+n <- 
+p <- 
+1 - pbinom(n/4,n,p)
+```

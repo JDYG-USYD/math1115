@@ -1,0 +1,93 @@
+---
+title: "Chi-square and Linear Model"
+output: rmdformats::robobook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(MASS)
+```
+
+# Chi-square Test
+
+## Independence
+
+```{r}
+glimpse(Aids2)
+
+chisq.test(table(Aids2$state, Aids2$status)) # chisq.test takes a contingency table of x and y.
+```
+
+## Goodness of Fit
+
+```{r}
+Aids2 %>% 
+  group_by(sex) %>% 
+  count -> gender
+
+gender
+```
+
+Then use chisq.test(observed count vect, expected probability vect)
+
+```{r}
+observed <- gender$n
+expected <- c(.5,.5)
+chisq.test(observed, p = expected)
+```
+
+## homogeneity
+
+```{r}
+glimpse(HairEyeColor)
+```
+
+Mind this data set puts gender in different groups, select them out:
+
+```{r}
+# Select with a_table[row,col,grp]
+males <- HairEyeColor[,,"Male"]
+females <- HairEyeColor[,,"Female"]
+```
+
+Now do chisq.test
+
+```{r}
+chisq.test(males, females)
+```
+
+There should be warnings, since the chisq.test requires minimum of observation of 5, but we have 3 here. So we need to:
+
+```{r}
+chisq.test(males, females, simulate.p.value = TRUE)
+```
+
+# Regression Model Testing
+
+We use to use `lm(var1 ~ var2)`.
+
+But this requires var1 and var2 should be completely independent to each other.
+
+Better way to do is:
+
+```{r}
+ggplot(iris, aes(Petal.Width, Petal.Length)) +
+  geom_point()
+
+# To create model:
+model <- lm(Petal.Length ~ Petal.Width, data = iris)
+```
+
+Now we can plot out the model
+
+```{r}
+plot(model) # 4 plots default-generated, use which = to select what you want
+
+# or
+library(ggfortify)
+autoplot(model, which = c(1,2))
+```
+
+
+

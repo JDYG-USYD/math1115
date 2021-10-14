@@ -1,0 +1,228 @@
+---
+title: "DATA1001/1901 Topic 7"
+subtitle: "Chance Variability"
+author: "© University of Sydney 2021"
+output:
+  html_document:
+    code_download: true # embed .Rmd file
+    toc: true  # table of contents
+    toc_depth: 3
+    toc_float: true # toc is always visible when scrolled
+    number_sections: true 
+    theme: sandstone # theme the doc
+    highlight: tango # theme syntax colouring
+---
+
+
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+h3 { /* Resize header 2: */
+  font-size: 18px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+}
+
+```
+
+*Note that this document has been updated in 2021 and may look slightly different from the lab videos.*
+
+# Live Demo 
+
+## Simulations
+
+We will use the same boxes from Challenge, so you can compare your results.
+
+## Box 1
+
+What we know:
+
+- A box contains the numbers 1, 2, and 3. This is the population.
+- We draw 25 times from the box, with replacement. This forms the sample.
+- We are interested in the properties of the **sum** of the 25 draws. 
+
+How to model in R:
+
+```{r}
+# Step1: Define the box
+box <- c(1,2,3)
+
+# Step2: calculate the Mean and SD of the box
+mean_box <- mean(box)
+popsd_box <- sqrt((length(box)-1)/length(box) * sd(box))
+
+## Alternatively, we could use the `popsd()` function in the multicon package:
+# library(multicon) # install.packages("multicon")
+# popsd_box <- popsd
+
+# We will continue to use `popsd()` for the rest of this demo.
+
+# Step3: Calculate the EV and SE of the SUM of the sample
+ev <- 25 * mean_box
+se <- sqrt(25) * popsd_box
+
+# just to present it better:
+c(ev,se)    
+```
+
+**Question:** Using the appropriate normal approximation/curve, can we estimate the chance that the sum of the sample is between  50 and  55 (inclusive)? 
+
+First, work out the standard units, and draw the standard Normal curve. Then, calculate the probability from this curve, tapping on your knowledge of the properties of a Normal curve, or using R.
+
+```{r}
+su1 <- (50-ev)/se
+su2 <- (55-ev)/se
+pnorm(su2)-pnorm(su1)
+
+# Quicker way
+pnorm(55,ev,se)-pnorm(50,ev,se)
+
+## Adjust your calculation, using the continuity correction?  Why do we use it?
+pnorm(49.5,ev,se)-pnorm(55.5,ev,se)
+```
+
+
+
+## Box 2
+
+- A box contains the numbers 1, 2, 3, 4, 5, and 6. This is the population.
+- We draw 16 times from the box, with replacement. This forms the sample.
+- We are interested in the properties of the **mean** of the 16 draws. 
+
+How to model in R:
+
+```{r, message=FALSE}
+# Step1: Define the box
+box <- 1:6 # we can use the ":" operator to produce number sequences more easily
+
+# Step2: Calculate the Mean and SD of the box
+mean(box)
+library(multicon)
+popsd(box) 
+
+# Step3: Calculate the EV and SE of the MEAN of the sample
+ev <- mean(box)
+se <- popsd(box)/sqrt(16)
+c(ev,se)    
+```
+
+
+# Have a go
+
+For the remainder of the lab, go through the following exercises. **In the code chunks below, remove the options `results='hide'` and `fig.show='hide'` to reveal the code output.**
+
+## Experiment with the CLT
+
+- Experiment with the [Seeing Theory: CLT](https://students.brown.edu/seeing-theory/probability-distributions/index.html) app.
+- In your own words, define the CLT in a sentence.
+
+## Think about the CLT
+In which of the following scenarios could the CLT be applied to the sample sum or sample mean? Justify your answer.
+
+- We extract samples of size 1 from a symmetric distribution.
+- We extract samples of size 30 from a symmetric distribution.
+- We extract samples of size 30 from an asymmetric distribution.
+- We extract 100 samples from an asymmetric distribution.
+
+## Simulate simple box (symmetric)
+
+Experiment to find out what minimum size number of draws it takes, for the distribution of the sample sum to start looking like a Normal curve. 
+
+Method: Use `replicate` to simulate 1000 samples of 10 draws (and then 100 draws) from a 0,1 box, and compare your results.
+
+Take 10 draws from a box with population 0,1 [1000 replicates]
+
+```{r, results='hide', fig.show='hide'}
+set.seed(1)
+box <- c(0, 1)
+totals <- replicate(1000, sum(sample(box, 10, rep = TRUE)))
+table(totals)
+mean(totals)
+sd(totals)
+hist(totals, nclass = 20)
+```
+
+Take 100 draws from a box with population 0,1 [1000 replicates]
+
+```{r, results='hide', fig.show='hide'}
+set.seed(1)
+box <- c(0,1)
+totals <- replicate(1000, sum(sample(box, 100, rep = TRUE)))
+table(totals)
+mean(totals)
+sd(totals)
+hist(totals, nclass = 20)
+```
+
+## Simulate assymetric box
+
+Experiment to find out what minimum size number of draws it takes, for the distribution of the sample sum to start looking like a Normal curve.
+
+Take 10 draws from a box with the population 0,1,1,1,1,1,1 [1000 replicates]
+
+```{r, results='hide', fig.show='hide'}
+set.seed(1)
+box <- c(0,1,1,1,1,1,1)
+totals <- replicate(1000, sum(sample(box, 10, rep = TRUE)))
+table(totals)
+mean(totals)
+sd(totals)
+hist(totals, nclass = 20)
+```
+
+Take 100 draws from a box with the population 0,1,1,1,1,1,1 [1000 replicates]
+
+```{r, results='hide', fig.show='hide'}
+set.seed(1)
+box <- c(0, rep(1, 6)) # alternative to c(0,1,1,1,1,1,1)
+totals <- replicate(1000, sum(sample(box, 100, rep = TRUE)))
+table(totals)
+mean(totals)
+sd(totals)
+hist(totals, nclass = 20)
+```
+
+
+## Explore -- tidyverse
+
+What if we want to use `ggplot2` on a data that is stored as a vector object (i.e. it *isn't* a **data frame**)? Let's work it out using the latest `totals` output from the above exercises. Don't forget to load the `tidyverse`!
+
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+What type of data is `total`?
+
+```{r}
+str(totals) # we can also use class() if we really want specific information
+```
+
+One way to plot the data is to convert it to a `data.frame` object using `as.data.frame()` or simply `data.frame()`. However, `ggplot()` works well with vectors - just don't declare a `data =` argument!
+
+```{r}
+ggplot() +
+  geom_histogram(aes(x = totals), binwidth = 2) +
+  theme_bw() +
+  xlab("Totals") +
+  ylab("Frequency")
+```
+

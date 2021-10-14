@@ -1,0 +1,313 @@
+---
+title: "Regression Tests & Non-Linear Models"
+output: rmdformats::robobook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+```
+
+# Summary
+
+- Simple Linear Regression (SLR) is a statistical method that estimates the linear relationship between two variables (a predictor and a response). 
+
+- There are two model assumptions for SLR:
+    - Equal variances (homoscedasticity)
+    - Normality
+    
+- Residual (prediction error) is the vertical distance/gap of a point above and below the regression line. It represents the error between the actual value and the prediction.
+    - *Normalized* residuals are plotted to check the model assumptions (e.g. QQ-plot for normality, Residual vs Fitted Values Plot for equal/constant variance).
+    
+- If the model assumptions are not met, the model output/results cannot be used. *Transformations* on the observations can be tried (e.g. Log10, Square Root) to meet the assumptions. 
+
+- Some variables may have non-significant linear relationships, but significant non-linear relationship and thus needs to be modeled accordingly. 
+
+We will look at what we can do when the assumptions of a linear model cannot be validated through a simple linear model.
+
+# Demo
+
+## Olympic 100m sprint 
+
+We will be using the same data set as Week 6 Lab: `Olympics100m.csv`. Import the data into R.
+
+```{r message=FALSE, warning=FALSE}
+olym <- 
+  read_csv("data/Olympics100m.csv", 
+           name_repair = janitor::make_clean_names) %>%
+  rename(name = 2) %>%
+  dplyr::select(1:5)
+```
+
+> **Research question**: Is there a linear relationship between sprint time and the year of the race, for male record holders?
+
+We focus on male record holders and create a linear model between `male` individuals and `year`. *Note: steps are outlined for demonstration purposes.*
+
+## **Step 1:** generate the scatter plot {-}
+
+If we want, we could always use `geom_smooth()` to explore the "shape" of the data. 
+
+```{r, message = FALSE}
+# Isolate data, focusing on males:
+males <- 
+  olym %>%
+  dplyr::filter(gender == "male")
+
+ggplot(males, aes(year, time)) +
+  geom_point() +
+  geom_smooth(aes(colour = "Linear model"),
+              method = "lm", 
+              fill = "cornflowerblue",
+              alpha = .1) +
+  geom_smooth(aes(colour = "LOESS"),
+              fill = "goldenrod",
+              alpha = .1) +
+  scale_colour_manual(name = "",
+                      values = c("cornflowerblue", "goldenrod")) +
+  theme_bw() +
+  theme(legend.position = "bottom") +
+  xlab("Year") +
+  ylab("Time (s)")
+  
+```
+
+But always focus on the simplest model first, and there is a linear model to look at:
+
+## **Step 2:** fit a linear model {-}
+
+```{r}
+# create model fit
+fit <- lm(time ~ year, males)
+fit
+```
+
+Before we can interpret the model, we should check our assumptions and see if the data and model are a good fit.
+
+## **Step 3:** check assumptions {-}
+
+```{r}
+par(mfrow = c(1, 2)) # align how the plots are displayed
+plot(fit, which = c(2, 3))
+```
+
+Assumptions of the linear model were checked visually by observing residual diagnostic plots. 
+
+**Conclusion**: The data does not meet the assumption of normality due to the presence of an outlier. (Scaled outlier has gone on or over 2.0 from plot 2)
+
+Validating assumptions relies heavily on your judgement. It is equally valid to ignore the effect of the out-lair if you can justify the decision.
+
+## What if assumptons are not validated? {-}
+
+**If we conclude that the model may not be appropriate enough to represent the data, how do we proceed from here?** We can do these, but with quirks:
+
+- Remove the outlier
+  - **Ignoring outliers is dangerous** - what if the outlier is a true population sample? The [Challenger disaster](https://www.vice.com/en/article/qkvvg5/how-mistakes-were-made) happened due to the removal outliers when modelling o-ring structural stability (these were used to seal the rocket boosters). 
+
+- Transform the relationship so that a linear model can still be used to describe it
+  - Data transformation can make it difficult to interpret the transformed relationships, as back-calculating transformations to interpret the relationship has a multiplicative effect on the error term.
+  - Try to find a different equation actually, but this can be hard since new equation can be difficult to explain.
+
+- Use Non-Linear models (Worst thing to do)
+  - Non-linear models make model selection difficult - which model is better? Does the selected model truly describe the relationship? Are we over-fitting the data?
+
+Perhaps the most conservative way to approach this is to perform data transformations first. You can explore this immediately by adjusting the model fit and checking the diagnostic plots again.
+
+- The first step is to transform the **response** i.e. *y* variable.
+- If the same issues occur, we can transform the **predictor**. 
+
+1. For skewness: root transform e.g. $x^{1/2}$
+2. For outliers and heavy skewness: Log it. 
+3. For really crappy data: make $1/x$.
+
+## Transform the *response* variable {-}
+
+`lm(log(time) ~ year, males)`: What you do here is changing the relationship of the variables, reminder do not change the data while data transforming.
+
+```{r}
+fit <- lm(log(time) ~ year, males)
+par(mfrow = c(1, 2)) # make diagnostic plots more compact (optional)
+plot(fit, which = c(2, 3))
+```
+
+## Trasform the *predictor* variable {-}
+
+`lm(log(time) ~ log(year), males)`: Now apply Log on both
+
+```{r}
+fit <- lm(log(time) ~ log(year), males)
+par(mfrow = c(1, 2)) # make diagnostic plots more compact (optional)
+plot(fit, which = c(2, 3))
+```
+
+## Use Polynomial Fitting (Optional) {-}
+
+`lm(time ~ poly(year, 2), males)`: ploy() is recommended, especially this relationship is linked into the time, if using `I(year * year^2)` this will be enforced but which can be not true.
+
+```{r}
+fit <- lm(time ~ poly(year, 2), males)
+par(mfrow = c(1, 2)) # make diagnostic plots more compact (optional)
+plot(fit, which = c(2, 3))
+
+ggplot(males, aes(year, time)) +
+  geom_point() +
+  geom_line(aes(y = predict(fit))) +
+  theme_minimal()
+```
+
+## Use Non-Linear Fitting (Optional) {-}
+
+This requires good domain knowledge and a keen mathematical sense and will not be explored in this tutorial. See the following resources:
+
+- https://www.statforbiology.com/2020/stat_nls_usefulfunctions/
+- https://www.statforbiology.com/nonlinearregression/usefulequations
+
+*Note that it will be difficult to fit a non-linear model to this data due to the outlier not "fitting" non-linear patterns.*
+
+## Alternative: Remove Outlier {-}
+
+The outlier occurs at the head of our data - we can constrain the model.
+
+*Interesting note: the relationship between time and year may simply be [spurious](https://en.wikipedia.org/wiki/Spurious_relationship).*
+
+```{r}
+# remove outlier
+fit <- 
+  males %>%
+  filter(time < 11.5) %>%
+  lm(time ~ year, .)
+par(mfrow = c(1, 2)) # make diagnostic plots more compact (optional)
+plot(fit, which = c(2, 3))
+```
+
+## **Step 4 & 5:** Plot & interpret the results {-}
+
+```{r}
+males %>%
+  filter(time < 11.5) %>%
+  ggplot(aes(year, time)) +
+  geom_point() +
+  geom_line(aes(y = predict(fit))) +
+  theme_bw() +
+  xlab("Year") +
+  ylab("Time (s)")
+```
+
+```{r}
+summary(fit)
+```
+
+(Focused on the R-squared variables mainly if p fails to reject the null hypothesis, customers become happier if the averaged one is closed to one.)
+
+Results indicate a statistically significant linear relationship between `year` and `time` (R^2* = 0.9; p < 0.001).
+
+# Explore
+
+## Blood Alcohol Concentration (BAC)
+
+## Domain knowledge
+
+[Drinkwise](https://drinkwise.org.au/drinking-and-you/is-there-such-a-thing-as-safe-drink-driving/#)
+
+1. What is Blood Alcohol Concentration (BAC)
+2. What is the BAC for 1 gram of alcohol per kilogram of blood?
+3. What is the legal BAC for driving a car in Australia for the different licences (L's, P's, Full)
+4. What are the effects of different levels of BAC
+<br>
+
+## Importing the data and exploratory data analysis (EDA)
+
+When working with a new data set, following data upload, we want to do an exploratory data analysis (EDA). This means plotting the data, looking for patterns or trends between any variables, or getting information that would help you decide what your next modelling/analysis should be.
+
+```{r, warning=FALSE}
+library(readxl)
+alco <- read_excel("data/AlcoholConcentration.xlsx")
+str(alco)
+cor(alco)
+
+# What does the correlation coefficient tell you?
+ggplot(alco, aes(x = TimeHours, y = BloodAlcoholConcentration)) +
+  geom_point() +
+  ggtitle("Blood Alcohol Concentration across Time from Initial Consumption") + 
+  ylab("BAC (%)") + 
+  xlab("Time (Hours)") + 
+  theme_bw()
+# What does this plot tell you?
+```
+
+## Linear model
+
+[Widmark's Formula](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4361698/) states that:
+\[ BAC = \frac{100A}{rW} - V t \]
+where
+
+- A = amount of alcohol consumed (in grams)
+- r = Widmark's factor, measuring the % of body mass that is water (women \approx 0.6; men \approx 0.7)
+- W = body mass (in grams)
+- V = rate at which the boy eliminates alcohol (eg V=0.015%)
+- t = time since commencing drinking (in hours)
+<br><br>
+
+1. Given the following, show that for an Australian male after 4 beers Widmark's formula (to 3dp) is \[ BAC = 0.100 - 0.015 t \]
+
+- the average Australian male [weighs 85.9kg](http://www.abs.gov.au/ausstats/abs@.nsf/Lookup/4338.0main+features212011-13).
+- a beer contains 1.5 standard drinks, where a standard drink has 10g alcohol. 
+<br>
+
+2. Fit this model to the data
+\[ BAC = 0.100 - 0.015 t    \]
+  
+  a. From the plot, how long does it take to be legal to drive?
+```{r}
+ggplot(alco, aes(x = TimeHours, y = BloodAlcoholConcentration)) + 
+  geom_point() +
+  geom_abline(aes(intercept = 0.10, slope = -0.015), 
+              color = "darkgreen", 
+              size = 1) +
+  geom_hline(aes(yintercept = 0.05), color = "red", linetype = "dotted") +
+  theme_bw() +
+  theme(legend.position = "none") +
+  ylab("BAC (%)") + xlab("Time (Hours)") + 
+  ggtitle("Blood Alcohol Concentration across Time from Initial Consumption") 
+```
+
+  b. Using the scatter plot and residual plots, assess the suitability of the model.
+```{r}
+
+```
+
+## Blood Ice Concentration (BIC) 
+
+## Domain knowledge
+
+The Alcohol and Drug Foundation [ADF](https://adf.org.au/drug-facts/ice/) is an Australian  organisation that looks into delivering evidence-based approaches to minimise alcohol and drug harm.
+
+1. What are the different forms of meth?
+2. What are possible side-effects of using crystal meth (ice)?
+3. How long can the ice 'high' last?
+4. What are some medical uses of meth?
+5. Why does Australia now regulate the sale of pseudoephedrine (a common nasal decongestant)?
+
+```{r}
+
+```
+
+## Importing the data and exploratory data analysis (EDA)
+
+Upload the `MethConcentration.xls` data set and perform an exploratory data analysis. 
+
+## Modelling
+
+1. Fit a linear model and assess the model's reliability using residuals. 
+    a. What is the correlation coefficient?
+
+2. **Optional**: Let's try fitting different models:
+Try adding the following models on the same plot with the linear model using `ggplot2`. 
+    a. $y = e^{-t}$
+    b. $y = 47e^{-0.06t}$, for $t > 3$.
+What is the best model out of the three? Based on this model, how much ice remains in the blood after 2 hours?
+
+## Past Data Stories
+
+For each of the previous linear models (from Lab 5), check their residuals. Decide whether a linear model was appropriate and if so, what can you conclude on the relationship between the variables, if not, suggest other methods to try. 
