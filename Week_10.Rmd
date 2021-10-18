@@ -1,0 +1,291 @@
+---
+title: "MATH1115 Computer Practical Exam"
+output: 
+  html_document:
+    code_download: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: no
+    theme: default
+    highlight: tango
+---
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 24px;
+}
+h3 { /* Resize header 3: */
+  font-size: 16px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+  }
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Instructions
+
+:::{.alert .alert-danger}
+This is a selection of questions taken from a past exam paper. Answers are not provided by default but can be demonstrated by a tutor.
+:::
+
+## Getting started
+
+1. You have been provided a data file, `colleges.csv` and *this* R Markdown file to complete the exam.
+2. Read the data briefing. It will provide useful information about the variables in the dataset.
+3. Attempt all questions. You have **100 minutes**, including reading time of 10 minutes. 
+4. All answers **must** be presented in the appropriate sections and *numbered* according to the question.
+5. All plots **must** be in `ggplot2`. Note that diagnostic plots (Residual, QQ plots) that are used to test for data assumptions may remain as base R plots.
+6. **Do not edit this template.** Only provide answers in the appropriate blocks (see below).
+7. For all hypothesis testing questions, unless stated otherwise, assume that $\alpha = 0.05$.
+
+## Writing your answers
+
+- All answers should be written within the answer alert blocks provided. These alert boxes look like below in the source document:
+
+::: {.alert .alert-info}
+
+Write your answers within this block, including code chunks.
+
+:::
+
+## Submission
+
+1. When the time is up (100 min), you will have 15 minutes to submit your assignment.
+2. **Only .html file submissions are accepted.** 
+3. You will not be able to submit an incomplete .Rmd file.
+4. Rename your final file to `XXXXXXXXXX_MATH1115_Exam.html` where `XXXXXXXXXX` is your SID.
+
+## Acknowledgement
+
+Please acknowledge that you have read the instructions above by replacing `XXXXXXXXXX` with your SID. 
+
+::: {.alert .alert-info}
+**I have acknowledged the instructions in this file. My SID is**: 
+
+470033070
+
+:::
+
+# Briefing on Data
+
+The given file, `data.csv`, contains information about universities and colleges in the U.S.A. Most of the data concerns the 1993-94 academic year. The data consists of the following variables, 
+
+- `University`: name of the university or college.
+- `Private`: variable which equals 1 if the university or college is private and 0 if it is public. 
+- `Apps`: number of applications received.
+- `Accept`: number of applicants accepted.
+- `Enrol`: number of new students enrolled.
+- `Top10pct`: percentage of new students from top 10% of high school class.
+- `Top25pct`: percentage of new students from top 25% of high school class.
+- `FullTime`: number of full-time undergraduates.
+- `PartTime`: number of part-time undergraduates.
+- `RoomBaord`: room and board costs.
+- `Books`: estimated book costs.
+- `Personal`: estimated personal spending.
+
+The source of the data is the 1995 U.S. News & World Report's Guide to America's Best Colleges. This dataset may be obtained from the StatLib Library at Carnegie Mellon University, 
+
+http://lib.stat.cmu.edu/datasets/ 
+
+The given file, `data.csv`, is an abridged version of the original dataset. 
+
+
+
+## Research Task
+
+Hoachen, your boss, is interested in understanding trends in the living expenses of university students in 1993, as a comparison to current reports. Your task is to help Haochen analyse the `data.csv` using this template provided. 
+
+The code chunk below will load the tidyverse for you.
+
+```{r, include=FALSE}
+library(readr)
+library(tidyverse)
+```
+
+## Initial data analysis
+
+Read `colleges.csv` into your R Markdown file such that the code below works. Your data object should be called `crime`. Set `eval=TRUE` once this is done.
+
+```{r}
+colleges <- read.csv("data/colleges.csv")
+```
+
+**Question 1**: Write a short paragraph on at least one limitation and at least one ethical consideration **associated** with this data.
+
+**Question 2**: Provide both a numerical summary and graphical summary for the variable "Books". Write a short paragraph on your findings for both the numerical summary and the graphical summary.
+
+**Question 3**: For each of the variables "Private" and "RoomBoard", provide a graphical summary using ggplot. Write a short paragraph summarising your findings. 
+
+
+:::{.alert .alert-info}
+
+Q1: 
+
+
+
+
+Q2:
+
+```{r}
+colleges %>% 
+  pull(Books) %>% 
+  summary() # Answer
+
+colleges %>% 
+  ggplot(aes(Books)) +
+  geom_histogram() # Answer
+```
+
+- Right skewed
+
+- Big gap between min and max
+
+Q3:
+
+```{r}
+colleges %>% 
+  ggplot(aes(factor(Private), RoomBoard)) + 
+  geom_boxplot() +
+  xlab("Private or Not") +
+  ylab("Room and Board Costs ($)")
+```
+
+- Median cost of room and board is lower in public schools.
+
+:::
+
+
+# Simple linear regression
+
+**Research Question**: Haochen claims that there is a positive linear relationship between the number of applications received and the number of applications accepted. Evaluate the evidence in favor of this claim by performing a simple linear regression.
+
+:::{.alert .alert-info}
+
+```{r}
+colleges %>% 
+  select(Apps, Accept) %>% 
+  ggplot(aes(Apps, Accept)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+Do HATPC
+
+```{r}
+lm(Accept ~ Apps, data = colleges) -> fit
+
+# par(mfrow = c(2,1))
+plot(fit, which = 1:2)
+```
+- Equal variances not met (Fanning pattern)
+
+- Normality not met (Heavy tails)
+
+```{r}
+summary(fit)
+```
+
+- Reject Null Hypo based on t
+
+:::
+
+# Chi-squared test
+
+**Research Question**: It is claimed that, on average, Chatham College and Lesley College have equal numbers of new enrollments every year, while Stephens College has twice as many yearly enrollments as the two other colleges. Perform a chi-squared test with \(\ \alpha = 0.05 \)\ to determine the statistical significance of any evidence against this claim. In your answer, use H A T P C.
+
+:::{.alert .alert-info}
+(Answer)
+
+:::
+
+
+
+# T-test (100% Tested)
+
+In general, were the cost of books more expensive in **private** colleges compared to **non-private** colleges? 
+
+i) Visualize the relationship between `Private` and `Books`.
+ii) Perform a t-test comparing the mean cost of books between the two types of colleges. Make sure to use H A T P C. *Note: if the assumptions were not met, interpret the results anyway.*
+
+
+:::{.alert .alert-info}
+
+Q1:
+
+Q2:
+
+```{r}
+t.test(Books ~ Private, data = colleges, var.equal = FALSE)
+```
+
+HATPC
+
+Null: No diff
+
+Alt: Diff
+
+```{r}
+# Equal Variances
+colleges %>% 
+  ggplot(aes(y = Books)) +
+  geom_boxplot() +
+  facet_wrap(~ factor(Private))
+
+# Normality
+colleges %>% 
+  ggplot(aes(sample = Books)) +
+  geom_qq() +
+  geom_qq_line() +
+  facet_wrap(~ factor(Private))
+```
+
+:::
+
+# Data wrangling
+
+Document the code below using comments (i.e. #) and explain what each line is doing. You may add comments above or beside each line. 
+
+```{r, echo = T, warning = F, message = F, eval = F}
+
+library(tidyverse) 
+
+boxplot(data$Enrol)
+
+df <- data(data$Apps > 50,)
+
+data %>% 
+  filter(data$Apps < 100) %>%
+  dim %>%
+  nrow
+
+data %>%
+  select(Private, Accept) %>% 
+  group_by(Private) %>% 
+  summarise(Accept = sum(Accept))
+
+data$Enrol %>% 
+  max(., na.rm = T)
+
+```
+
+# End
+
+This is the end of the exam.

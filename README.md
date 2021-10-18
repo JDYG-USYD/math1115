@@ -23,6 +23,6 @@
   
   * [Extra Box Model](http://htmlpreview.github.io/?https://github.com/JDYG-USYD/math1115/blob/master/Week_9_boxmodel_extra.html)
   
-* [Week 10](http://htmlpreview.github.io/?https://github.com/JDYG-USYD/math1115/blob/master/Week_10.html)
+* [Week 10 (Sample Exam 1)](http://htmlpreview.github.io/?https://github.com/JDYG-USYD/math1115/blob/master/Week_10.html)
 
 * [Week 11](http://htmlpreview.github.io/?https://github.com/JDYG-USYD/math1115/blob/master/Week_11.html)
