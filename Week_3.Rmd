@@ -1,0 +1,327 @@
+---
+title: "Lab 3: Data wrangling"
+subtitle: "MATH1115 -- Interrogating Data"
+author: "&copy; University of Sydney `r format(Sys.time(), '%Y')`"
+date: 
+output:
+  html_document:
+    code_download: true # embed .Rmd file
+    toc: true  # table of contents
+    toc_depth: 3
+    toc_float: true # toc is always visible when scrolled
+    number_sections: true 
+    df_print: default # format data frame outputs automatically
+    theme: sandstone # theme the doc
+    highlight: tango # theme syntax colouring
+---
+
+<!-- ######################################### -->
+<!-- #### Style settings - do not delete! #### -->
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+}
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- #########  End style settings. ########## -->
+<!-- ######################################### -->
+
+# Data Wrangling
+
+- **what happens before data is analysed**. It includes activities like:
+  - Data import
+  - Cleaning and "tidying" data
+  - Reshape and pivoting data
+  
+# dplyr
+- create data pipelines, with pipe operator `%>%`.
+  - From 4.1 R has its own native pipe operator `|>`. As it is not yet mature we will not be referring to native pipes.
+
+# Demo
+
+In R, the `%>%` operator from the `dplyr` package allows us to "daisy-chain" functions together. This eases the need to assign intermediate variables when moving data from one function to another:
+
+Normally, this is done by passing vars or the functions as parameters of another function:
+```{r, eval=FALSE}
+
+# Assigning intermediates:
+
+mydata2 <- foo(mydata)
+mydata3 <- bar(mydata2)
+mydata4 <- foobar(mydata3)
+
+mydata2 <- foobar(bar(foo(mydata)))
+```
+
+The pipes can be used to perform a sequence of action from one dataset to be proceed.
+
+```{r, eval=FALSE}
+mydata %>%         # using mydata,
+  foo() %>%        # Do foo
+  bar() -> mydata2 # Do bar and assign to a new data object: mydata2
+
+```
+
+When your actions are simplified in steps, debugging issues in code becomes much easier. Thus, as soon as you are thinking of performing multiple actions on data, you should start considering `%>%` pipes to simplify your workflow.
+
+## Basics of data wrangling
+
+- **data import** to **data manipulation** to a end of**data summary** or **data visualisation**.
+
+1. **Data import**: `read_csv()`, `read_excel()`
+2. **Data manipulation**:
+  - `select()` - isolate column(s) (Categories)
+  - `slice()` - isolate row(s) (Sets)
+  - `arrange()` - change the order or rows (Order)
+  - `mutate()` - create or overwrite variables using functions (Change)
+  - `filter()` - select specific data based on use-defined cases (Select)
+  - `group_by()` - change the scope of functions, where actions are no longer performed on the entire dataset, but on a group-by-group basis.
+3. **Data summary**:
+  - `summarise()`- reduce values to a single summary, and is often used after `group_by()`
+4. **Data visualisation**: 
+  - `ggplot()` and associated functions
+
+Time to load the `dplyr` package by calling the tidyverse.
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+## Simple example: `mtcars`
+
+Let's begin with a simple and familiar dataset, `mtcars`.
+
+```{r}
+# perform the glimpse function on `mtcars`
+glimpse(mtcars)
+```
+
+The data contains 11 variables, all of which have been identified as `dbl` or continuous, numeric variables by R. Looking at `?mtcars`, we can determine that some of the variables are not truly continuous and can be interpreted as either factor or ordinal variables. **As data scientists, we get to decide what those variables are when we wrangle the dataset before analysing it.**
+
+First, let's use a pipe to re-write the `glimpse()` code above.
+
+```{r, eval=FALSE}
+mtcars %>%    # using the mtcars dataset,
+  glimpse()   # view its structure
+```
+
+This is literally `glimpse(.)` or `glimpse(.)`, in R . means the returned object itself.
+The pipe makes mtcars return itself and passed into glimpse().
+
+
+## Exercise 1
+> What does the distribution of `mpg` look like in this dataset?
+- What does mpg category generally look like?
+
+Using the `mtcars` data, we will
+
+- `select()` the `mpg` variable, then
+- check the `summary()` of this variable.
+
+```{r}
+mtcars %>%
+  select(mpg) %>%
+  summary()
+```
+
+What if we just want to observe the mpg of each brand of car in descending order and save the output? We can rearrange the `mpg` values from biggest to smallest and save this output e.g., as `arranged_mpg`.
+
+Using the `mtcars` data, we will
+
+- `select()` the `mpg` variable, then
+- `arrange()` the data in `desc()` order by `mpg`, then
+- `->` assign the data to an object called `arranged_mpg`.
+
+```{r}
+mtcars %>%
+  select(1) %>% # Select the first column of mtcars dataset 
+  arrange(desc(mpg)) ->
+  arrange_mpg
+
+# print
+arrange_mpg
+```
+- The `select(1)` means select the first column, same as picking the name mpg as `select(mpg)`, or select column 1 from mtcars like `select(mtcars,1)` and `select(.,1)`
+- For select, you can select ranges with select(start:end)
+
+## Exercise 2
+> Are there differences in mean `mpg` between automatic and manual transmission (the `am` subject) vehicles?
+
+```{r}
+mtcars %>%                        # Using the `mtcars` data, we will
+  select(am, mpg) %>%             # select the variables `am` and `mpg`, then
+  group_by(am) %>%                # group by `am`, then
+  # Here, we have 2 groups from am as 0 and 1
+  summarise(mean_mpg = mean(mpg)) # summarise each group by calculating the mean `mpg`
+  # Here, a var mean_mpg was created to pop in to the summarise() as a parameter
+```
+
+Alternatively, *visualise* the difference with a plot, e.g., bar chart.
+
+Using the `mtcars` data, we will
+
+- select the variables `am` and `mpg`, then
+- group by `am`, then
+- summarise each group by the mean `mpg`, then
+- plot the results using `ggplot()`.
+
+```{r}
+mtcars %>%                        # Using the `mtcars` data, we will
+  select(am, mpg) %>%             # select the variables `am` and `mpg`, then
+  group_by(am) %>%                # group by `am`, then
+  summarise(mean_mpg = mean(mpg)) %>% # summarise each group by the mean `mpg`, then
+  ggplot(aes(x = am, y = mean_mpg)) + # plot the results using `ggplot()`
+  geom_bar(stat = "identity") +
+  xlab("Transmission") +
+  ylab("Miles per gallon")
+```
+
+- What is wrong with the visualisation above? 
+  - The x-axis is poo poo.
+- Can we convert "Miles per gallon" to "km per litre"? 
+  - Sure
+- Since we are summarising by mean, can we demonstrate the variability in the data using standard deviation, `sd()`?
+
+*Note: 1 mpg = 0.425 km L^-1^*
+
+```{r}
+mtcars %>%                        # Using the `mtcars` data, we will
+  select(am, mpg) %>%             # select the variables `am` and `mpg`, then
+  
+  # Change numerics to factor
+  mutate(am = as.factor(am)) %>%  # convert `am` to factor, then
+  mutate(am =recode(am, "0" = "Auto", "1" = "Manual")) %>% # rename the variables, then
+  group_by(am) %>%                    # group by `am`, then
+  summarise(mean_mpg = mean(mpg),      # summarise each group by the mean `mpg`, and by
+            sd = sd(mpg)) %>%         # standard deviation, then
+  ungroup() %>%                       # remove grouping, then
+  # If it's a tibble or something, no need to ungroup
+  mutate(kml = mean_mpg * 0.425) %>%  # convert mpg to km/L, then
+  ggplot(aes(x = am, y = kml)) +      # plot the results using `ggplot()`
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = kml - sd, ymax = kml + sd), width = .1) +
+  xlab("Transmission") +
+  ylab("Fuel efficiency (km/L)")
+```
+
+# Explore: Titanic 
+
+A disaster so epic, movies and show are still made about it more than 100 years later. Let's dive into a version of this dataset and practice some data wrangling.
+
+## Domain knowledge
+
+- What is the back story to the `Titanic` data? 
+- The `Titanic_train.csv` and `Titanic_test.csv` are from [Kaggle](https://www.kaggle.com/upendr/titanic-machine-learning-from-disaster/data). Why are there two datasets?
+- What are the variables of the data sets?
+
+## Import the data
+
+Read in the `Titanic_train.csv` and `Titanic_test.csv` files. How does the `train` set differ to the `test` set in terms of the number of variables and number of observations?
+
+```{r, include=FALSE}
+# read the titanic data and save them as objects 
+# called "train" and "test"
+# you will probably need to change the code below
+
+train <- read_csv("data/Titanic_train.csv")
+test <- read_csv("data/Titanic_test.csv")
+```
+
+```{r}
+# add your code below
+```
+
+## A small(ish) dataset
+
+Use the `Titanic_train` data set to answer some questions. Example code has been given. Can you re-write them using `dplyr` pipes?
+
+**Question**: What was the average fare paid, and in what units?
+
+```{r, eval=FALSE}
+train$Fare %>%
+  mean(na.rm = T) -> mean_fare
+train$Fare %>%
+  sd(na.rm = T) -> sd_fare
+mean_fare
+sd_fare
+```
+
+How do these fares compare to today's prices?
+[Prices](https://autumnmccordckp.weebly.com/tickets-and-accomodations.html)
+
+**Question**: What was the mean age of males and females?
+
+```{r, eval=FALSE}
+train %>% 
+  group_by(Sex) %>% 
+  summarise(meanAge = mean(Age, na.rm = TRUE))
+```
+
+What would the code look like without the `%>%` operator?
+
+**Question**: What was the survival rate for males and females?
+
+```{r, eval=FALSE}
+train$Survived %>%
+  table %>%
+  prop.table()
+```
+
+**Question**: What was the survival rate for passengers, for each class of passenger?
+
+```{r, eval=FALSE}
+train %>%
+  select(2:3) %>%
+  group_by(Pclass) %>%
+  summarise(percentageDeath = )
+
+# in dplyr?
+```
+
+**Question**: Calculate the proportion of passengers surviving for each gender category. What can you observe from the table and what may be the reason for this?
+
+## A bigger dataset
+
+First we will combine the `Titanic_test` set with the `Titanic_train` set to create a larger data set. This is easy with `dplyr`, we use the `bind_rows()` function, which automatically matches the variables while joining the two data together by sticking one on top of the other.
+
+
+```{r, eval=FALSE}
+combined <- bind_rows(train, test)
+tail(combined)
+```
+
+- Notice that the `test` data did not have the variable `Survived`, and thus `bind_rows()` automatically applied `NA` values when the data was combined. 
+- What should we do with the NA for age? What do you notice about shape of data, and how might that inform our choice?
+
+Try to do the following exercises, sticking to `dplyr` pipes (`%>%`) as much as possible.
+
+1. Use `glimpse()` to view the structure of the data.
+2. Use `select()` to print out only the `Fare` column.
+3. Use `select()` and print these variables only: `Survived`, `Pclass`, `Sex`, `Age`, `SibSp`, `Parch` and `Ticket`. *Hint: try using the `:` operator to select a range of columns.*
+4. While not true, assume that all `NA` values in the `Survived` variable are `0` (did not survive) and convert the `NA` values to `0`. *Hint: use `recode()`.*
+5. Determine the average `Fare` per `Pclass`. *Hint: you need to group by `Pclass`, then summarise `Fare`.*
+6. Explore the data further and experiment with `mutate()`, `filter()` and `arrange()`!

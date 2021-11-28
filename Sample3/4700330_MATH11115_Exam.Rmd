@@ -1,0 +1,379 @@
+---
+title: "MATH1115 Final Practical Exam"
+output: 
+  html_document:
+    code_download: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: no
+    theme: default
+    highlight: tango
+---
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 24px;
+}
+h3 { /* Resize header 3: */
+  font-size: 16px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+  }
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+:::{.alert .alert-danger}
+This is a selection of questions taken from a past exam paper. Answers are not provided by default but can be demonstrated by a tutor.
+:::
+
+## Getting started
+
+1. You have been provided a data file, `PlaneCrashes.csv` and *this* R Markdown file to complete the exam.
+2. Read the data briefing. It will provide useful information about the variables in the dataset.
+3. Attempt all questions. You have **100 minutes**, including reading time of 10 minutes. 
+4. All answers **must** be presented in the appropriate sections and *numbered* according to the question.
+5. All plots **must** be in `ggplot2`. Note that diagnostic plots (Residual, QQ plots) that are used to test for data assumptions may remain as base R plots.
+6. **Do not edit this template.** Only provide answers in the appropriate blocks (see below).
+7. For all hypothesis testing questions, unless stated otherwise, assume that $\alpha = 0.05$.
+
+## Writing your answers
+
+- All answers should be written within the answer alert blocks provided. These alert boxes look like below in the source document:
+
+```
+::: {.alert .alert-info}
+
+Write your answers within this block, including code chunks.
+
+:::
+
+```
+
+
+## Submission
+
+1. When the time is up (100 min), you will have 15 minutes to submit your assignment.
+2. **Only .html file submissions are accepted.** 
+3. You will not be able to submit an incomplete .Rmd file.
+4. Rename your final file to `XXXXXXXXXX_MATH1115_Exam.html` where `XXXXXXXXXX` is your SID.
+
+## Acknowledgement
+
+Please acknowledge that you have read the instructions above by replacing `XXXXXXXXXX` with your SID. 
+
+::: {.alert .alert-info}
+**I have acknowledged the instructions in this file. My SID is**: 
+
+470033070
+
+:::
+
+# Briefing on Data
+The data provided contains information on historical plane crashes from 1980 to 2018. There are 5782 observations and 13 variables:
+
+1. `date`: Date of accident (January 01, 2001 format)
+2. `time`: Local time (24 hour format)
+3. `location`: location information
+4. `operator`: Airline or aircraft operator.
+5. `flight_no`: Flight number 
+6. `route`: Complete or partial route flown prior to accident.
+7. `ac_type`: Aircraft type
+8. `registration`: ICAO registration
+9. `cn_ln`: Construction number/Line number
+10. `aboard`: Total aboard (passengers/crew)
+11. `air`: Total killed in air (passengers/crew)
+12. `ground`: Total killed on the ground
+13. `total`: Total killed in crash
+
+There are many missing observations denoted with a `?`.   
+
+## PART A: SETTING UP {-}
+Before beginning any data analysis/wrangling, it is advisable to first set up the .rmd document by loading any required packages and data. This keeps the document neat and readable. 
+
+i) Install and load the `tidyverse` package
+```{r}
+library(tidyverse)
+```
+ii) Save the `PlaneCrashes.csv` dataset available from the Canvas Exam page and replace the code below so that the file is loaded from your local folder, and not the web link.
+```{r}
+plane <- read.csv("data/PlaneCrashes.csv")
+plane_CLEAN <- read_csv("data/PlaneCrashesCLEAN.csv")
+```
+
+## PART B: CLEANING DATA{-}
+The dataset has many variables that are not in a helpful format. Therefore, the dataset needs to be cleaned and wrangled into something that would be useful for further analysis. 
+
+i) Change the single `date` variable into three variables: `month`, `day`, `year`.
+
+::: {.alert .alert-info}
+
+```{r}
+library(lubridate)
+plane %>% 
+  mutate(date = mdy(date)) %>% 
+  mutate(year = year(date)) %>% 
+  mutate(month = month(date)) %>% 
+  mutate(day = day(date)) -> plane
+```
+
+Now we have our 3 new variables.
+
+:::
+
+
+ii) Keep only the total number `aboard` and total number of `air` deaths (i.e. the first values of the columns) and drop the rest (i.e. the passenger/crew distinction)
+
+::: {.alert .alert-info}
+
+```{r}
+plane_CLEAN %>% 
+  select(aboard, air) -> only_2
+aboard <- c(max(only_2$aboard, na.rm = T))
+air <- c(max(only_2$air, na.rm = T))
+data.frame(
+  aboard, air
+)
+```
+
+
+:::
+
+iii) Drop these columns `flight_no`, `registration`, `cn_ln`
+
+::: {.alert .alert-info}
+
+```{r}
+plane %>% 
+  select(-flight_no, -registration, -cn_ln) -> plane
+```
+
+
+:::
+
+
+## PART C: INITIAL DATA ANALYSIS {-}
+
+Provide the following summaries/graphs and comment on the output.
+
+i) A numerical summary for the `total` variable, including the standard deviation
+
+::: {.alert .alert-info}
+
+```{r}
+summary(plane_CLEAN$total)
+sd(plane_CLEAN$total, na.rm = TRUE)
+```
+
+:::
+
+ii) A graph for the `total` variable
+
+::: {.alert .alert-info}
+
+```{r}
+ggplot(plane_CLEAN, aes(plane_CLEAN$total)) +
+  geom_bar()
+```
+
+:::
+
+iii) A graph for the total number of deaths in the 20th Century versus the 21st Century (i.e use `total` and `year`)
+
+::: {.alert .alert-info}
+
+```{r}
+plane_CLEAN %>% 
+  select(total, year) %>% 
+  mutate(is_21_century = case_when(
+    year < 2000 ~ 0,
+    year >= 2000 ~ 1
+  )) %>% 
+  ggplot(aes(factor(is_21_century), total)) +
+  geom_bar(stat = "identity", width = 0.8) +
+  xlab("Is 21 century?") +
+  ylab("Total death")
+```
+
+
+:::
+
+
+## PART D: BINOMIAL{-}
+
+i) Create a table that looks like the one below where `all` is whether all passengers died (or not) and `n` is the number of crashes that fall in that category.
+
+|all|n|
+|---|-|
+|NO|2069|
+|YES|3674|
+
+
+::: {.alert .alert-info}
+
+```{r}
+data.frame(all = c('no', 'yes'),
+           n = c(2069, 3674))
+```
+
+
+:::
+
+
+ii) Calculate the chance of selecting a crash where all aboard died
+
+
+::: {.alert .alert-info}
+
+```{r}
+3674 / (2069 + 3674)
+```
+
+:::
+
+iii) Model this sampling by a box model with 50 draws (with replacement) and calculate the expected value and standard error for the total number of crashes where all aboard died (i.e. `YES`) in the sample
+
+::: {.alert .alert-info}
+
+```{r}
+box <- c(rep(0, times = 10000000 - 6397353), rep(1, times = 6397353))
+
+ev <- mean(box) * 50
+
+library(multicon)
+
+se <- popsd(box) * sqrt(50)
+
+c(ev,se)
+```
+
+From the model, we expect that out of 50 draws, nearly 32 of them should include a entire home/apt as an option, with expected error range of 3.4 draws.
+
+:::
+
+
+## PART E: CHI-SQUARE{-}
+We are interested in whether there is a difference in crash occurrence where everyone aboard died between the months of the year. Perform a chi-squared test for independence to test this hypothesis. Report following the H A P T C process.   
+
+i) First create a contingency table like the following:
+
+|Month|NO|YES|
+|-----|--|---|
+|January|187|348|
+|February|153|276|
+|March|157|328|
+|April|144|269|
+|May|151|249|
+|June|159|258|
+|July|179|293|
+|August|186|333|
+|September|190|316|
+|October|163|332|
+|November|181|322|
+|December|219|350|
+
+
+
+::: {.alert .alert-info}
+
+The `aboard` in `plane` is damaged by its weird encoding and `plane_CLEAN` does not have a date for month whatsoever.
+
+F
+
+
+:::
+
+ii) Now perform the chi-squared test
+
+
+::: {.alert .alert-info}
+
+Same as above.
+
+:::
+
+
+
+## PART F: SIMPLE LINEAR REGRESSION {-}
+Now we're interested in seeing if there is a linear relationship between crash occurence and Year from 1960 onwards. 
+
+i) Subset the data to get the number of crashes per year from 1960 onwards.
+
+
+::: {.alert .alert-info}
+
+!Data Integrity Issue
+
+:::
+
+
+ii) Calculate the linear correlation coefficient.
+
+
+::: {.alert .alert-info}
+
+!Data Integrity Issue
+
+:::
+
+
+iii) Check that Simple Linear Regression (SLR) assumptions are met by plotting the standardised residuals vs fitted values plot and a qqnorm plot. Comment on the plot and suggest alternatives if assumption(s) are not met.
+
+
+::: {.alert .alert-info}
+
+!Data Integrity Issue
+
+:::
+
+
+
+iv) Assuming that all assumptions are met, report the results of the SLR following the H A P T C process
+
+
+::: {.alert .alert-info}
+
+!Data Integrity Issue
+
+:::
+
+
+
+v) Now plot the data as a scatterplot with the linear regression line
+
+
+::: {.alert .alert-info}
+
+!Data Integrity Issue
+
+:::
+
+
+
+## PART G: EXECUTIVE SUMMARY {-}
+Include an executive summary covering the main points of this dataset/report.
+
+::: {.alert .alert-info}
+
+Whoever decide to put these data sheets into an exam, Please get out.
+
+:::

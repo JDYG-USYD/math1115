@@ -1,0 +1,356 @@
+---
+title: "Lab 2: Grammar of graphics"
+subtitle: "MATH1115 -- Interrogating Data"
+author: "&copy; University of Sydney `r format(Sys.time(), '%Y')`"
+date: 
+output:
+  html_document:
+    code_download: true # embed .Rmd file
+    toc: true  # table of contents
+    toc_depth: 3
+    toc_float: true # toc is always visible when scrolled
+    number_sections: true 
+    df_print: paged # format data frame outputs automatically
+    theme: default # theme the doc
+    highlight: textmate # theme syntax colouring
+---
+
+<!-- ######################################### -->
+<!-- #### Style settings - do not delete! #### -->
+
+```{css newstyles, echo=FALSE}
+body{ /* Most readable font (esp < 8): */
+  font-family: Verdana;
+}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+/* Space Between TOC and 
+Righthand side content on large screens */
+
+@media (min-width: 992px) {
+  .col-md-9 {
+    width: 75%;
+    padding-left: 5em !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- #########  End style settings. ########## -->
+<!-- ######################################### -->
+
+
+# The ggplot2
+
+- Currently part of the tidyverse, allows us to compose graphs by combining *layers* of information, in a manner that can be structured and understood in plain language. This is achievable because `ggplot2` has an underlying grammar structure based on the [Grammar of Graphics](https://vita.had.co.nz/papers/layered-grammar.html).
+
+- The basic components of a `ggplot()` are:
+    1. The **canvas**, where you map your aesthetics
+    2. The **geometric layer(s)**, where you generate the plot
+    3. The details, which involve **scales, axes, legends and facets**
+
+The basic grammar of a `ggplot()` relies on adding "blocks" on top of one another with the help of the `+` operator:
+
+```
+canvas +
+  geometric layer +
+  scale +
+  legends +
+  facets +
+  ...
+```
+
+## Tidyverse
+
+Load the `tidyverse` package using `library()`. If you need to install it, do it **in the console**. We have deliberately commented the install code so that you do not run them in a code chunk!
+
+```{r, message=FALSE}
+# install.packages("tidyverse")
+library(tidyverse)  # loads the packages we need: dplyr and ggplot2
+```
+
+# Demo
+
+## The canvas
+
+What is the canvas? What are aesthetics? Let's view a basic `ggplot()` output where we do not add a geometric layer, using the `airquality` dataset that you are now familiar with from the first lab.
+
+```{r}
+# canvas only
+ggplot(data = airquality)
+```
+
+Even when a dataset is provided, only a blank canvas is produced unless we provide additional information in the form of **aesthetics**. Let's define some using `aes()`.
+
+```{r}
+# canvas and aesthetics
+ggplot(airquality, aes(x = Temp))
+```
+
+What has changed? Try to change the variable in `x` to `Solar.R` or `Temp`. What happens to the x-axis?
+
+- It gives different range of the x-axis, based on the dataset given.
+
+
+## Geometric layer(s)
+
+In the first lab, we looked at the histogram of `Ozone` from the `airquality` dataset, using base R graphics:
+
+```{r}
+# histogram of `Ozone` in `airquality` using base R plot
+hist(airquality$Ozone, 
+  col = "lightgreen", 
+  xlab = "Mean Ozone (ppb)", 
+  main = "New York Air Quality (May-Sept 1973)")
+```
+
+Let's create a histogram of the same data using `ggplot()`. We do this by adding a `geom_histogram()` layer after the canvas, using the `+` operator.
+
+```{r, message=FALSE, warning=FALSE}
+# histogram of `Ozone` in `airquality` using ggplot2
+ggplot(airquality, aes(x = Ozone)) +  # create canvas + aes, then
+  geom_histogram() # generate a histogram
+```
+
+- Notice the message about `stat_bin()` and non-finite values. Why do you think they appear? 
+  - The stat_bin is because the default-30-bar graph set can be better
+  - And there are blank data slot, as non-finite values.
+  
+- What else can we do to make the plot look more like the one made in base R? (We can come back to this question later.)
+
+Customize it a bit:
+```{r, message=FALSE, warning=FALSE}
+ggplot(airquality, aes(x = Ozone)) + # create canvas + aes, then
+  # generate a histogram:
+  geom_histogram(fill = "lightgreen", # fill bars
+                 colour = "black",    # colour lines
+                 bins = 9) +          # no. of bars
+                # Or can use binwidth: this defines how thick the bar is.
+  ylab("Frequency")  # rename y axis label
+```
+
+Geometric layers, or geoms, are defined by the `geom_*()` function. The `ggplot()` package provides a plethora geoms which can automatically map the data defined in `aes()`, into the plots! Try the following:
+
+- `geom_boxplot()`
+- `geom_density()`
+- `geom_bar()`
+- `geom_dotplot()`
+
+```{r, message=FALSE, warning=FALSE}
+# a density plot using ggplot2:
+ggplot(airquality, aes(x = Ozone)) +
+  geom_density(fill = "lightgreen") 
+```
+
+## Multiple layers
+
+We can use different aesthetics, based on the same data, to plot *both* a histogram and a density plot.
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(airquality) +  # create canvas, then...
+  # add histogram, then...
+  geom_histogram(aes(x = Ozone, y = ..density..), 
+                 fill = "lightgreen",
+                 colour = "black",
+                 bins = 9) + # the magic
+  # add density plot layer
+  geom_density(aes(x = Ozone), 
+               size = 2)  
+```
+Reminder: the order of the layer is back + front + fronter + ...
+
+## Positioning the aesthetics
+
+The plot above is possible because we can define different aesthetics in each geom. Below is another example using bivariate data from `airquality`.
+
+```{r, message=FALSE, warning=FALSE}
+# constructing a scatter plot with best-fit regression line
+ggplot(airquality, aes(Solar.R, Temp)) +
+  geom_point() + 
+  geom_smooth(method = "lm") +  # generate linear regression line (lm)
+  xlab("Solar radiation (Angstroms)") +  # set x-axis label
+  # y-axis label with special character:
+  ylab(expression("Temperature " ( degree*C))) 
+
+```
+
+All the code below will produce the exact same plot:
+- Because aesthetics can be on any layout, know it's flexible.
+
+```{r, eval=FALSE}
+
+# move aesthetics to the geoms:
+ggplot(airquality) +
+  geom_point(aes(Solar.R, Temp)) +
+  geom_smooth(aes(Solar.R, Temp),
+              method = "lm") + 
+  xlab("Solar radiation (Angstroms)") +  # set x-axis label
+  # y-axis label with special character:
+  ylab(expression("Temperature " ( degree*C))) 
+
+# move data canvas and aesthetics to the geoms:
+ggplot() +
+  geom_point(data = airquality, aes(Solar.R, Temp)) +
+  geom_smooth(data = airquality, aes(Solar.R, Temp),
+              method = "lm") + 
+  xlab("Solar radiation (Angstroms)") +  # set x-axis label
+  # y-axis label with special character:
+  ylab(expression("Temperature " ( degree*C))) 
+```
+
+
+## Grouping by a third variable (dimensions)
+
+- [Simpson's paradox](https://en.wikipedia.org/wiki/Simpson%27s_paradox)
+  - Basically means data cannot be representative by simply adding up to show something, there are other factors can impact on them.
+- To understand whether there are differences between categories of data. 
+
+We can use `Month` to group our data by colour in `ggplot2`. However, it is currently a `numeric` variable. Let's add  `Month` as a third aesthetic. 
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(airquality, aes(Solar.R, Temp, 
+                       colour = Month)) +
+  geom_point() +
+  geom_smooth(method = "lm") +  
+  xlab("Solar radiation (Angstroms)") +  
+  ylab(expression("Temperature " ( degree*C))) 
+```
+
+Because `Month` has been identified as a continuous variable, the plot has not visualised the data "properly". It is still quite difficult to see differences in the patterns among months.
+
+In the first Lab, we showed that `Month` should be converted to a factor. The reason for doing so is because plots will interpret data differently based on their `class()`.This is the same plot, but with `Month` converted to a variable of class `factor`:
+
+```{r, message=FALSE, warning=FALSE}
+# replot the same visualisation, but now with factor(Month)
+ggplot(airquality, aes(Solar.R, Temp, 
+                       colour = factor(Month))) + # ***
+  geom_point() +
+  geom_smooth(method = "lm") +  
+  xlab("Solar radiation (Angstroms)") +  
+  ylab(expression("Temperature " ( degree*C))) 
+```
+
+Success! But are we able to look at the plot and easily isolate the raw points?. When using colours or shapes to differentiate groups and the result looks "busy", it is a good idea to **facet** the plot using `facet_wrap()`.
+
+```{r, message=FALSE, warning=FALSE}
+# replot the same visualisation, but now with facet_wrap()
+ggplot(airquality, aes(Solar.R, Temp, 
+                       colour = factor(Month))) + # ***
+  geom_point() +
+  geom_smooth(method = "lm") +  
+  xlab("Solar radiation (Angstroms)") +  
+  ylab(expression("Temperature " ( degree*C))) +
+  facet_wrap(~ Month)
+```
+
+
+# Explore: boxplot
+
+We have only scratched the surface of what can be done using `ggplot2`.
+You will now spend the rest of the lab to explore scales, axes, legends and facets and understand data better.
+
+Create a boxplot using 2 variables: `Ozone` and `Month` with the following conditions:
+
+1. `Ozone` as `y`, and is named appropriately on the axis
+2. `Month` as `x`, and is named appropriately on the axis
+3. `Month` is renamed to the months May -- Sep, instead of numbers
+4. `Month` is arranged by date when plotted
+5. All boxplots are filled with the colour `"firebrick"`
+6. A theme of your choice is applied to the entire plot.
+
+Hints:
+
+These are real web browser searches. By default, we are using the Google search engine to process these keywords.
+
+- [ggplot rename x axis names](https://www.google.com/search?q=ggplot+rename+x+axis+names)
+- [ggplot reorder a variable](https://www.google.com/search?q=ggplot+reorder+a+variable)
+- [ggplot change boxplot colour](https://www.google.com/search?q=ggplot+change+boxplot+colour)
+- [ggplot add theme](https://www.google.com/search?q=ggplot+add+theme)
+
+```{r}
+# create your plot here
+```
+
+
+# Explore: multivariate plot
+
+We will improve on the scatterplot that was produced in the Demo.
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(airquality, aes(Solar.R, Temp, colour = factor(Month))) +
+  geom_point() +
+  geom_smooth(method = "lm") +  
+  xlab("Solar radiation (Angstroms)") +  
+  ylab(expression("Temperature " ( degree*C))) +
+  facet_wrap(~ Month)
+
+```
+
+1. Rename the months from numbers to May -- Sep
+2. Rename the Legend title from `"factor(Month)"` to `"Month"`
+3. Rearrange the facet so that it is wrapped in two columns, not three columns.
+4. Instead of a universal scale, make it such that each plot has its own individual y-axis that is scaled for the data.
+5. Move the legend from the right side of the canvas to the top.
+
+Hints:
+
+Search for these keywords yourself:
+
+- ggplot facet_wrap column number
+- ggplot facet_wrap individual scale 
+- ggplot move legend position top
+
+# Explore: road fatalities
+
+You should have some understanding of how to read `.csv` and `.xlsx` files into R by now.
+How do you construct your code such that the `read*()` code works when you transfer it to a group member?
+
+Notes:
+
+- Try to understand how file paths work *relative* to an R Markdown file. 
+- If a data file is in the same folder as your `.Rmd` file, then reading the file is as easy as `read.csv("filename.csv")`.
+- If the data file is in a folder, and that folder is in the same folder as your `.Rmd` file (e.g. the "data" folder), then you will need to add the folder path to the code: `read.csv("folder/filename.csv")`
+- If the file is an Excel file, then you have to use the `readxl` package and read the file using `read_excel()`.
+
+
+Read the `AllFatalities.csv` file into R and save it as an object, e.g. `fatalities`.
+
+```{r}
+# read the .csv file `ardd_fatalities_nov2020.csv`
+
+# use this to check if your data file is in the same directory 
+# as this .Rmd file: 
+# list.files() 
+
+# use this to determine the working directory of
+# this .Rmd file:
+# getwd()
+
+# example code:
+# fatalities <- read.csv("data/AllFatalities.csv")
+```
+
+- Investigate the structure of the data. What variables are interesting?
+- Use numerical summaries to find interesting observations.
+- Use `ggplot2` to visualise interesting patterns.
+- List some research questions that can be answered with the `ggplot2` plots.

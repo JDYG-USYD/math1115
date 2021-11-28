@@ -1,0 +1,274 @@
+---
+title: "Lab 4: Data pipelines & the grammar of graphics (gg)"
+subtitle: "MATH1115 -- Interrogating Data"
+author: "&copy; University of Sydney `r format(Sys.time(), '%Y')`"
+date: 
+output:
+  html_document:
+    code_download: true # embed .Rmd file
+    toc: true  # table of contents
+    toc_depth: 3
+    toc_float: true # toc is always visible when scrolled
+    number_sections: true 
+    df_print: default # format data frame outputs automatically
+    theme: sandstone # theme the doc
+    highlight: tango # theme syntax colouring
+---
+
+<!-- ######################################### -->
+<!-- #### Style settings - do not delete! #### -->
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+}
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+<!-- #########  End style settings. ########## -->
+<!-- ######################################### -->
+
+# Summary
+
+Learning outcome L03 -- interpret and compare graphical and numerical summaries using `ggplot2`
+
+In this lab we will:
+
+- Learn to **explore data** to observe patterns for initial research questions;
+- combine what we have learned in Weeks 2 and 3 to create data efficient and tidy **data pipelines**, based on the tidyverse;
+- produce presentable **boxplots**, **bar** charts and **scatter plots**.
+
+
+
+# Demo
+
+Let's consider the `iris` dataset.
+
+```{r}
+glimpse(iris) # like str()
+```
+
+What if this were the first time we saw this data? How would we come up with research questions? For small data (approx. < 8 columns and < 500 rows) we can visualize them directly.
+
+## Bivariate relationships
+- Can be done outside of formal report
+```{r}
+plot(iris)
+```
+
+From `plot()` we can observe that:
+
+- There appear to be some linear relationships between variables
+- Separations
+- Groups
+- There are patterns of "clustering", which can be explored (because of observation below)
+- One variable is clearly a factor or ordinal. It can be used to investigate differences due to the factor
+
+
+## Univariate patterns
+- Focusing on single category data performance
+
+Here we use `ggplot2::facet_wrap()` to view a histogram of all **numeric** variables.
+
+```{r}
+iris %>%
+  as_tibble() %>% # Looks better if executed only
+  keep(is.numeric) %>%           # keep variables that pass `is.numeric()`
+  # Factors are now gone. (Species)
+  
+  pivot_longer(everything()) %>% # gather all variables
+  #This gives format like category(name): value(value) for all the entries in data
+  
+  ggplot(aes(value)) +           # plot
+  geom_histogram() +
+  facet_wrap(~ name, scales = "free") +  # view by facet
+  geom_blank() # why is this useful?
+```
+
+From the plots we can observe that:
+
+- All the variables are continuous
+- Multi-modal distributions of some variables observed.
+
+## Research questions
+
+> **Research question**: Is there a relationship between petal length and petal width?
+- Yes, linear model.
+
+```{r}
+iris %>%
+  select(Petal.Length, Petal.Width) %>% # This can be ignored, but why keep?
+  # If the data was pre-processed, like drop_na(), not selecting can make all categories drop NAs. However, this can be helpful for our analysis of targeted categories.
+  drop_na() %>%
+  
+  ggplot(aes(Petal.Length, Petal.Width)) +
+  geom_point() +
+  geom_smooth(method = "lm") + # generate linear regression line
+  xlab ("Petal length (cm)") +
+  ylab("Petal width (cm)") +
+  ggtitle("Relationship between petal length and petal width") +
+  theme_classic() + # Just a theme, theme_
+  geom_blank()
+```
+
+> **Research question**: Is petal length different between species?
+- Yes, lots.
+- And boxplot and barplot are all good to go.
+
+```{r}
+iris %>%
+  select(Petal.Length, Species) %>%
+  ggplot(aes(Species, Petal.Length)) + # add `fill =` to add color to boxes
+  geom_boxplot() +
+  xlab("") +
+  ylab("Petal length (cm)") +
+  ggtitle("Differences in petal length between species") +
+  theme_minimal() +
+  geom_blank()
+```
+
+Use summary statistics to describe the plot better!
+
+```{r}
+iris %>%
+  select(Petal.Length, Species) %>%
+  group_by(Species) %>%
+  summarise(mean = mean(Petal.Length),
+            median = median(Petal.Length))
+```
+
+Observation: The boxplot shows that each species has a distinct range of petal length values. For example, *setosa* species has the smallest mean petal length (1.46 cm), which is at least `r round(5.55/1.46, 0)` times smaller than *virginica*. The range of petal lengths for versicolor and virginica overlap.
+
+**Bonus question**: Is there a better way to visualise the data?
+
+## Large data
+
+Consider the `diamonds` data.
+
+```{r}
+glimpse(diamonds)
+```
+
+With more than 53,000 rows, using `plot()` is ill-advised.
+
+- Don't do it, crush your computer and life.
+
+However since this is a large data set we may still be able to observe patterns by randomly sampling the data to achieve at least 500 samples.
+
+and reducing columns can help: focus on the categories that you care.
+
+```{r}
+diamonds %>%
+  sample_frac(0.01) %>% # sample 1% of the data to plot
+  plot()
+```
+
+Here we can see how `plot()` becomes less useful when many variables are involved. This is where domain knowledge comes into play. We pick variables of interest based on what we understand about diamond properties, and the quick exploratory plot that we have visualized.
+
+From the plots, we can observe that:
+
+- x, y, z are representing the same thing (size) because how perfect there linear relationships of each other.
+- there is a possible linear relationship between carat and price.
+- many variables are categorical, therefore we can explore their influence on price!
+
+```{r}
+diamonds %>%
+  keep(is.numeric) %>%
+  pivot_longer(everything()) %>% # gather all variables
+  ggplot(aes(value)) +           # plot
+  geom_histogram() +
+  facet_wrap(~ name, scales = "free") +  # view by facet
+  geom_blank()
+```
+
+Bsed on the histograms we can observe that:
+
+- `price` is very right-skewed, which is worth investigating
+- `carat` shows that high carat diamonds are rare in this dataset
+
+> **Research question**: What is the relationship between price and carat? Is the relationship related to clarity?
+
+```{r}
+diamonds %>%
+  select(price, carat, clarity) %>%
+  ggplot(aes(price, carat, colour = clarity)) +
+  geom_point() +
+  facet_wrap(~ clarity, scales = "free_x") +
+  xlab("Price (USD$)") +
+  ylab("Carat") +
+  ggtitle("Relationship between price and carat in `diamond` data") +
+  theme_bw() +
+  geom_blank()
+```
+
+What are your conclusions?
+
+> **Research question**: What is the total worth of all the diamonds in this dataset, based on colour?
+
+```{r}
+diamonds %>%
+  group_by(color) %>%
+  summarise(total = sum(price)) %>%
+  ggplot(aes(color, total)) +
+  geom_bar(aes(fill = color), stat = "identity") +
+  scale_colour_brewer() + # viridis
+  labs(fill = "Colour scale") +
+  xlab("Diamond colour scale") +
+  ylab("Total price (USD$)") +
+  ggtitle("Total worth of all diamonds, grouped by colour") +
+  theme_bw() + 
+  geom_blank()
+```
+
+# Explore: Texas housing data
+
+We will use the `txhousing` data, available in `ggplot2`. 
+
+```{r}
+glimpse(txhousing)
+```
+
+
+## Domain knowledge
+
+What is the background to the `txhousing` data? Hint: use `?txhousing`, and consider previewing the data by plotting. **Don't forget to downsample data that contains more than 500 samples/rows.**
+
+## Explore
+
+- Investigate the structure of the data
+- Find interesting observations with visualisations and numerical summaries.
+- Come up with several research questions to answer using `ggplot2`. **Don't forget to add labels and refine legends.**
+- Use numerical summaries to support your findings.
+
+
+## Project 1
+
+- How is progress?
+- Finalise your research questions and refine your plots based on what you have learned in this Lab
+- Record your presentations early so that someone can edit the videos (if necessary).
+- Any final questions?
+

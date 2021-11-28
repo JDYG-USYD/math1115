@@ -15,10 +15,13 @@ library(dplyr)
 - Simple Linear Regression (SLR) is a statistical method that estimates the linear relationship between two variables (a predictor and a response). 
 
 - There are two model assumptions for SLR:
+
     - Equal variances (homoscedasticity)
+    
     - Normality
     
 - Residual (prediction error) is the vertical distance/gap of a point above and below the regression line. It represents the error between the actual value and the prediction.
+
     - *Normalized* residuals are plotted to check the model assumptions (e.g. QQ-plot for normality, Residual vs Fitted Values Plot for equal/constant variance).
     
 - If the model assumptions are not met, the model output/results cannot be used. *Transformations* on the observations can be tried (e.g. Log10, Square Root) to meet the assumptions. 
@@ -41,13 +44,11 @@ olym <-
   dplyr::select(1:5)
 ```
 
-> **Research question**: Is there a linear relationship between sprint time and the year of the race, for male record holders?
-
-We focus on male record holders and create a linear model between `male` individuals and `year`. *Note: steps are outlined for demonstration purposes.*
+> **Is there a linear relationship between sprint time and the year of the race, for male record holders?**
 
 ## **Step 1:** generate the scatter plot {-}
 
-If we want, we could always use `geom_smooth()` to explore the "shape" of the data. 
+- Use `geom_smooth()` to explore the "shape" of the data. 
 
 ```{r, message = FALSE}
 # Isolate data, focusing on males:
@@ -70,7 +71,6 @@ ggplot(males, aes(year, time)) +
   theme(legend.position = "bottom") +
   xlab("Year") +
   ylab("Time (s)")
-  
 ```
 
 But always focus on the simplest model first, and there is a linear model to look at:
@@ -121,7 +121,7 @@ Perhaps the most conservative way to approach this is to perform data transforma
 2. For outliers and heavy skewness: Log it. 
 3. For really crappy data: make $1/x$.
 
-## Transform the *response* variable {-}
+### Transform the *response* variable {-}
 
 `lm(log(time) ~ year, males)`: What you do here is changing the relationship of the variables, reminder do not change the data while data transforming.
 
@@ -131,7 +131,7 @@ par(mfrow = c(1, 2)) # make diagnostic plots more compact (optional)
 plot(fit, which = c(2, 3))
 ```
 
-## Trasform the *predictor* variable {-}
+### Trasform the *predictor* variable {-}
 
 `lm(log(time) ~ log(year), males)`: Now apply Log on both
 
@@ -141,7 +141,7 @@ par(mfrow = c(1, 2)) # make diagnostic plots more compact (optional)
 plot(fit, which = c(2, 3))
 ```
 
-## Use Polynomial Fitting (Optional) {-}
+### Use Polynomial Fitting (Optional) {-}
 
 `lm(time ~ poly(year, 2), males)`: ploy() is recommended, especially this relationship is linked into the time, if using `I(year * year^2)` this will be enforced but which can be not true.
 
@@ -156,7 +156,7 @@ ggplot(males, aes(year, time)) +
   theme_minimal()
 ```
 
-## Use Non-Linear Fitting (Optional) {-}
+### Use Non-Linear Fitting (Optional) {-}
 
 This requires good domain knowledge and a keen mathematical sense and will not be explored in this tutorial. See the following resources:
 
@@ -165,7 +165,7 @@ This requires good domain knowledge and a keen mathematical sense and will not b
 
 *Note that it will be difficult to fit a non-linear model to this data due to the outlier not "fitting" non-linear patterns.*
 
-## Alternative: Remove Outlier {-}
+### Alternative: Remove Outlier {-}
 
 The outlier occurs at the head of our data - we can constrain the model.
 

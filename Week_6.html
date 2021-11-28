@@ -231,18 +231,18 @@
 <li><p>Linear association: Between two variables, measure how tightly the points cluster around a line <strong>where if there is a strong association</strong>, the cloud of the points will be tightly clustered around a line (i.e. one variable may be used to predict the other)</p></li>
 <li><p>Correlation coefficient (<em>r</em>): measures the clustering around the line and indicates both the sign and strength of the linear association.</p>
 <ul>
-<li>Lies between -1 and +1 where if <em>r</em> = +/-1, there is perfect correlation (i.e. all the points lie on the line).</li>
-<li>When <em>r</em> = 0, there is no correlation.</li>
-<li><em>r</em> is a pure number (no units)</li>
-<li>A positive <em>r</em> means a positive correlation, and a negative <em>r</em> a negative.</li>
+<li><p>Lies between -1 and +1 where if <em>r</em> = +/-1, there is perfect correlation (i.e. all the points lie on the line).</p></li>
+<li><p>When <em>r</em> = 0, there is no correlation.</p></li>
+<li><p><em>r</em> is a pure number (no units)</p></li>
+<li><p>A positive <em>r</em> means a positive correlation, and a negative <em>r</em> a negative.</p></li>
 </ul></li>
 <li><p>Regression line uses 5 numerical summaries:</p>
 <ul>
-<li>Mean of <em>x</em></li>
-<li>Mean of <em>y</em></li>
-<li>SD of <em>x</em></li>
-<li>SD of <em>y</em></li>
-<li><em>r</em></li>
+<li><p>Mean of <em>x</em></p></li>
+<li><p>Mean of <em>y</em></p></li>
+<li><p>SD of <em>x</em></p></li>
+<li><p>SD of <em>y</em></p></li>
+<li><p><em>r</em></p></li>
 </ul></li>
 </ul>
 <p>At the end of this Lab, you should be able to examine the relationships between variables using <em>correlation</em> and <em>visualization</em>, and justify whether regression is an appropriate model for the data (L04)</p>
@@ -291,38 +291,22 @@
 </tbody>
 </table>
 <ol start="2" style="list-style-type: decimal">
-<li>Given these options: -1, nearly -1, somewhat negative, 0, somewhat positive, nearly 1 and 1; what is the correlation between (with a short explanation):
+<li><p>Given these options: -1, nearly -1, somewhat negative, 0, somewhat positive, nearly 1 and 1; what is the correlation between (with a short explanation):</p>
 <ol style="list-style-type: lower-alpha">
-<li>A person’s age and their year of birth?</li>
-</ol>
-<ul>
-<li>Should be 1</li>
-</ul>
-<ol start="2" style="list-style-type: lower-alpha">
-<li>The price of a car and time?</li>
-</ol>
-<ul>
-<li>Should be nearly -1</li>
-</ul></li>
-<li>Given that the <em>family’s income = husband’s income + wife’s income</em>, and using the same options as in Q2; what is the correlation between (with a short explanation):
+<li><p>A person’s age and their year of birth? Should be 1</p></li>
+<li><p>The price of a car and time? Should be nearly -1</p></li>
+</ol></li>
+<li><p>Given that the <em>family’s income = husband’s income + wife’s income</em>, and using the same options as in Q2; what is the correlation between (with a short explanation):</p>
 <ol style="list-style-type: lower-alpha">
-<li>The wife’s income and the family income?</li>
-</ol>
-<ul>
-<li>Should be nearly 1</li>
-</ul>
-<ol start="2" style="list-style-type: lower-alpha">
-<li>The wife’s income and the husband’s income?</li>
-</ol>
-<ul>
-<li>Should be 0</li>
-</ul></li>
-<li>True or False: if <span class="math inline">\(r = 0.90\)</span>, then 90% of the points are highly correlated.</li>
-<li>Given the small data set below; <span class="math inline">\(r \approx\ 0.76\)</span>
+<li><p>The wife’s income and the family income? Should be nearly 1</p></li>
+<li><p>The wife’s income and the husband’s income? Should be 0</p></li>
+</ol></li>
+<li><p>True or False: if <span class="math inline">\(r = 0.90\)</span>, then 90% of the points are highly correlated.</p></li>
+<li><p>Given the small data set below; <span class="math inline">\(r \approx\ 0.76\)</span></p>
 <ol style="list-style-type: lower-alpha">
-<li>If you switch the two columns, does this change <em>r</em>?</li>
-<li>If you add 3 to each value of <em>y</em>, does this change <em>r</em>?</li>
-<li>Justify in R.</li>
+<li><p>If you switch the two columns, does this change <em>r</em>?</p></li>
+<li><p>If you add 3 to each value of <em>y</em>, does this change <em>r</em>?</p></li>
+<li><p>Justify in R.</p></li>
 </ol></li>
 </ol>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">xvar =</span> <span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>), <span class="at">yvar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">6</span>))</span></code></pre></div>
@@ -836,17 +820,17 @@
 </blockquote>
 <p>Eventually, we want to move beyond simple summary statistics and start to compare between variables.</p>
 <ul>
-<li>Construct a linear model between winning time and year for men. Using the model, predict the winning time for the 2021 Olympics (delayed due to COVID-19). Is this reliable?</li>
-<li>Your research question concerning a linear model should involve 2 quantitative/continuous variables. <em>Does the data fit the requirement?</em></li>
+<li><p>Construct a linear model between winning time and year for men. Using the model, predict the winning time for the 2021 Olympics (delayed due to COVID-19). Is this reliable?</p></li>
+<li><p>Your research question concerning a linear model should involve 2 quantitative/continuous variables. <em>Does the data fit the requirement?</em></p></li>
 </ul>
 <p>We will:</p>
 <ol style="list-style-type: decimal">
-<li>Generate the scatter plot and check correlation;</li>
-<li>Fit a linear model on the data;</li>
-<li>Check assumptions;</li>
-<li>Interpret the results;</li>
-<li>Update the plot with the model;</li>
-<li>Make a prediction (optional).</li>
+<li><p>Generate the scatter plot and check correlation;</p></li>
+<li><p>Fit a linear model on the data;</p></li>
+<li><p>Check assumptions;</p></li>
+<li><p>Interpret the results;</p></li>
+<li><p>Update the plot with the model;</p></li>
+<li><p>Make a prediction (optional).</p></li>
 </ol>
 </div>
 <div id="step-1-generate-the-scatter-plot-and-check-correlation" class="section level3">
@@ -875,7 +859,14 @@
 <div id="step-2-fit-a-linear-model" class="section level3">
 <h3><strong>Step 2</strong>: fit a linear model</h3>
 <p>Linear models are constructed using the <code>lm()</code> function. Note that we use the formula <code>y ~ x</code> to express a relationship between <code>x</code> and <code>y</code>.</p>
-<p>What is the formula? : - Formula (bi-variate relationship) - y ~ x (tilde) - y is a function of x (f(x)), y is the predicting value - y can be influenced by predictor x - For any relationship, define such function y ~ x</p>
+<p>What is the formula?</p>
+<ul>
+<li><p>Formula (bi-variate relationship)</p></li>
+<li><p>y ~ x (tilde)</p></li>
+<li><p>y is a function of x (f(x)), y is the predicting value</p></li>
+<li><p>y can be influenced by predictor x</p></li>
+<li><p>For any relationship, define such function y ~ x</p></li>
+</ul>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># lm(y ~ x, data)</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Also t.test, chisq... and tidymodules!</span></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(time <span class="sc">~</span> year, male_time)</span>
@@ -892,9 +883,9 @@
 <h3><strong>Step 3</strong>: check assumptions</h3>
 <p>Before proceeding, it is important to check if the data meets the assumptions of a linear model. These following assumptions apply:</p>
 <ul>
-<li>independence of x and y</li>
-<li>data meets assumption of normality</li>
-<li>data meets assumption of homogeneity of variances (equal variances)
+<li><p>independence of x and y</p></li>
+<li><p>data meets assumption of normality</p></li>
+<li><p>data meets assumption of homogeneity of variances (equal variances)</p>
 <ul>
 <li>Making sure that distance between entries to the lm line is somehow equal distanced.</li>
 </ul></li>
@@ -902,10 +893,10 @@
 <p>Warning: the model produces results even if assumptions are not met!</p>
 <p>We can simply <code>plot()</code> the model object to check these assumptions from the residuals produced by the model.</p>
 <ul>
-<li>First plot: check for linearity and equal variances</li>
-<li>Second plot: check for normality</li>
-<li>Third plot: check for equal variances</li>
-<li>Fourth plot: check for important outlines</li>
+<li><p>First plot: check for linearity and equal variances</p></li>
+<li><p>Second plot: check for normality</p></li>
+<li><p>Third plot: check for equal variances</p></li>
+<li><p>Fourth plot: check for important outlines</p></li>
 </ul>
 <p>The data meets both the assumptions of normality and equal variances.</p>
 <div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit)</span></code></pre></div>
@@ -949,7 +940,7 @@
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit, <span class="at">newdata =</span> <span class="fu">data.frame</span>(<span class="at">year =</span> <span class="fu">c</span>(<span class="dv">2021</span>, <span class="dv">2024</span>)))</span></code></pre></div>
 <pre><code>##        1        2 
 ## 9.513512 9.474709</code></pre>
-<p>It is often dangerous to predict outside a model, especially in a timeseries dataset!</p>
+<p>It is often dangerous to predict outside a model, especially in a time series dataset!</p>
 </div>
 </div>
 </div>
@@ -977,7 +968,7 @@
 <h2>Univariate exploration</h2>
 <p>Investigate your own questions, for example:</p>
 <ul>
-<li>What day had the worst air quality?</li>
+<li>What day had the worst air quality? `</li>
 <li>Which region (CE or NW) has overall better air quality?</li>
 </ul>
 </div>
@@ -992,12 +983,7 @@
 </div>
 <div id="past-data-stories" class="section level1 unnumbered">
 <h1 class="unnumbered">Past Data Stories</h1>
-<p>For each of the previous data stories, propose a research question involving linear regression (bivariate):</p>
-<ul>
-<li>Lab 1: <code>airquality</code></li>
-<li>Lab 2: <code>AllFatalities.csv</code></li>
-<li>Labs 3 &amp; 4: <code>Titanic_train.csv</code></li>
-</ul>
+<p>For each of the previous data stories, propose a research question involving linear regression (bivariate).</p>
 </div>
 
    

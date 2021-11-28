@@ -18,15 +18,25 @@ library(ggplot2)
 - Linear association: Between two variables, measure how tightly the points cluster around a line **where if there is a strong association**, the cloud of the points will be tightly clustered around a line (i.e. one variable may be used to predict the other)
 
 - Correlation coefficient (*r*): measures the clustering around the line and indicates both the sign and strength of the linear association.
+
     - Lies between -1 and +1 where if *r* = +/-1, there is perfect correlation (i.e. all the points lie on the line). 
+    
     - When *r* = 0, there is no correlation. 
+    
     - *r* is a pure number (no units)
+    
     - A positive *r* means a positive correlation, and a negative *r* a negative. 
+    
 - Regression line uses 5 numerical summaries:
+
   - Mean of *x*
+  
   - Mean of *y*
+  
   - SD of *x*
+  
   - SD of *y*
+  
   - *r*
 
 At the end of this Lab, you should be able to examine the relationships between variables using *correlation* and *visualization*, and justify whether regression is an appropriate model for the data (L04)
@@ -58,20 +68,25 @@ knitr::kable(tibble(x_avg, x_mean, x_sd, y_avg, y_mean, y_sd, cor = cor(df$x,df$
 ```
 
 2. Given these options: -1, nearly -1, somewhat negative, 0, somewhat positive, nearly 1 and 1; what is the correlation between (with a short explanation):
-    a. A person's age and their year of birth?
-    - Should be 1 
-    b. The price of a car and time?
-    - Should be nearly -1
+
+    a. A person's age and their year of birth? Should be 1 
+    
+    b. The price of a car and time? Should be nearly -1
 
 3. Given that the *family's income = husband's income + wife's income*, and using the same options as in Q2; what is the correlation between (with a short explanation):
-    a. The wife's income and the family income?
-    - Should be nearly 1
-    b. The wife's income and the husband's income?
-    - Should be 0
+
+    a. The wife's income and the family income? Should be nearly 1
+    
+    b. The wife's income and the husband's income? Should be 0
+    
 4. True or False: if $r = 0.90$, then 90% of the points are highly correlated.
+
 5. Given the small data set below;  $r \approx\ 0.76$
+
     a. If you switch the two columns, does this change *r*? 
+
     b. If you add 3 to each value of *y*, does this change *r*?
+
     c. Justify in R. 
 
 ```{r}
@@ -201,15 +216,21 @@ We might group all the countries having 1 gold medal, but plz don't remove it.
 Eventually, we want to move beyond simple summary statistics and start to compare between variables.
 
 - Construct a linear model between winning time and year for men. Using the model, predict the winning time for the 2021 Olympics (delayed due to COVID-19). Is this reliable?
+
 - Your research question concerning a linear model should involve 2 quantitative/continuous variables. *Does the data fit the requirement?*
 
 We will:
 
 1. Generate the scatter plot and check correlation;
+
 2. Fit a linear model on the data;
+
 3. Check assumptions;
+
 4. Interpret the results;
+
 5. Update the plot with the model; 
+
 6. Make a prediction (optional).
 
 ### **Step 1**: generate the scatter plot and check correlation
@@ -238,11 +259,16 @@ cor(male_time)
 
 Linear models are constructed using the `lm()` function. Note that we use the formula `y ~ x` to express a relationship between `x` and `y`.
 
-What is the formula? :
+What is the formula?
+
 - Formula (bi-variate relationship)
+
 - y ~ x (tilde)
+
 - y is a function of x (f(x)), y is the predicting value
+
 - y can be influenced by predictor x
+
 - For any relationship, define such function y ~ x
 
 ```{r}
@@ -257,8 +283,11 @@ fit
 Before proceeding, it is important to check if the data meets the assumptions of a linear model. These following assumptions apply:
 
 - independence of x and y
+
 - data meets assumption of normality
+
 - data meets assumption of homogeneity of variances (equal variances)
+
   - Making sure that distance between entries to the lm line is somehow equal distanced.
 
 Warning: the model produces results even if assumptions are not met!
@@ -266,8 +295,11 @@ Warning: the model produces results even if assumptions are not met!
 We can simply `plot()` the model object to check these assumptions from the residuals produced by the model.
 
 - First plot: check for linearity and equal variances
+
 - Second plot: check for normality
+
 - Third plot: check for equal variances
+
 - Fourth plot: check for important outlines
 
 The data meets both the assumptions of normality and equal variances.
@@ -305,7 +337,7 @@ Should we use this relationship to make a prediction for 2021? What about 2024?
 predict(fit, newdata = data.frame(year = c(2021, 2024)))
 ```
 
-It is often dangerous to predict outside a model, especially in a timeseries dataset!
+It is often dangerous to predict outside a model, especially in a time series dataset!
 
 # Explore: Air quality in Sydney 
 
@@ -326,7 +358,7 @@ glimpse(air)
 
 Investigate your own questions, for example:
 
-- What day had the worst air quality? 
+- What day had the worst air quality? `
 - Which region (CE or NW) has overall better air quality?
 
 ## Bivariate relationship
@@ -338,8 +370,4 @@ Investigate your own questions, for example:
 
 # Past Data Stories {-}
 
-For each of the previous data stories, propose a research question involving linear regression (bivariate):
-
-- Lab 1: `airquality`
-- Lab 2: `AllFatalities.csv`
-- Labs 3 & 4: `Titanic_train.csv`
+For each of the previous data stories, propose a research question involving linear regression (bivariate).

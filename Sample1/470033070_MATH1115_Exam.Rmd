@@ -1,0 +1,355 @@
+---
+title: "MATH1115 Computer Practical Exam"
+output: 
+  html_document:
+    code_download: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: no
+    theme: default
+    highlight: tango
+---
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 24px;
+}
+h3 { /* Resize header 3: */
+  font-size: 16px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+  }
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Instructions
+
+:::{.alert .alert-danger}
+This is a selection of questions taken from a past exam paper. Answers are not provided by default but can be demonstrated by a tutor.
+:::
+
+## Getting started
+
+1. You have been provided a data file, `colleges.csv` and *this* R Markdown file to complete the exam.
+2. Read the data briefing. It will provide useful information about the variables in the dataset.
+3. Attempt all questions. You have **100 minutes**, including reading time of 10 minutes. 
+4. All answers **must** be presented in the appropriate sections and *numbered* according to the question.
+5. All plots **must** be in `ggplot2`. Note that diagnostic plots (Residual, QQ plots) that are used to test for data assumptions may remain as base R plots.
+6. **Do not edit this template.** Only provide answers in the appropriate blocks (see below).
+7. For all hypothesis testing questions, unless stated otherwise, assume that $\alpha = 0.05$.
+
+## Writing your answers
+
+- All answers should be written within the answer alert blocks provided. These alert boxes look like below in the source document:
+
+::: {.alert .alert-info}
+
+Write your answers within this block, including code chunks.
+
+:::
+
+## Submission
+
+1. When the time is up (100 min), you will have 15 minutes to submit your assignment.
+2. **Only .html file submissions are accepted.** 
+3. You will not be able to submit an incomplete .Rmd file.
+4. Rename your final file to `XXXXXXXXXX_MATH1115_Exam.html` where `XXXXXXXXXX` is your SID.
+
+## Acknowledgement
+
+Please acknowledge that you have read the instructions above by replacing `XXXXXXXXXX` with your SID. 
+
+::: {.alert .alert-info}
+**I have acknowledged the instructions in this file. My SID is**: 
+
+470033070
+
+:::
+
+# Briefing on Data
+
+The given file, `data.csv`, contains information about universities and colleges in the U.S.A. Most of the data concerns the 1993-94 academic year. The data consists of the following variables, 
+
+- `University`: name of the university or college.
+- `Private`: variable which equals 1 if the university or college is private and 0 if it is public. 
+- `Apps`: number of applications received.
+- `Accept`: number of applicants accepted.
+- `Enrol`: number of new students enrolled.
+- `Top10pct`: percentage of new students from top 10% of high school class.
+- `Top25pct`: percentage of new students from top 25% of high school class.
+- `FullTime`: number of full-time undergraduates.
+- `PartTime`: number of part-time undergraduates.
+- `RoomBaord`: room and board costs.
+- `Books`: estimated book costs.
+- `Personal`: estimated personal spending.
+
+The source of the data is the 1995 U.S. News & World Report's Guide to America's Best Colleges. This dataset may be obtained from the StatLib Library at Carnegie Mellon University, 
+
+http://lib.stat.cmu.edu/datasets/ 
+
+The given file, `data.csv`, is an abridged version of the original dataset. 
+
+
+
+## Research Task
+
+Hoachen, your boss, is interested in understanding trends in the living expenses of university students in 1993, as a comparison to current reports. Your task is to help Haochen analyse the `data.csv` using this template provided. 
+
+The code chunk below will load the tidyverse for you.
+
+```{r, include=FALSE}
+library(readr)
+library(tidyverse)
+```
+
+## Initial data analysis
+
+Read `colleges.csv` into your R Markdown file such that the code below works. Your data object should be called `colleges`. Set `eval=TRUE` once this is done.
+
+```{r}
+colleges <- read.csv("data/colleges.csv")
+```
+
+**Question 1**: Write a short paragraph on at least one limitation and at least one ethical consideration **associated** with this data.
+
+**Question 2**: Provide both a numerical summary and graphical summary for the variable "Books". Write a short paragraph on your findings for both the numerical summary and the graphical summary.
+
+**Question 3**: For each of the variables "Private" and "RoomBoard", provide a graphical summary using ggplot. Write a short paragraph summarising your findings. 
+
+
+:::{.alert .alert-info}
+
+Q1: 
+
+Our data collects from a really narrow spin of time, which means it can barely indicating any trends over time. The ethical issue here can be collecting these entries may not be acknowledged by all individuals of the students, they may contribute to this data set without knowing they were statistically studied.
+
+---
+
+Q2:
+
+Numerical:
+```{r}
+colleges %>% 
+  pull(Books) %>% 
+  summary() # Answer
+```
+
+Graphical:
+```{r}
+colleges %>% 
+  ggplot(aes(Books)) +
+  geom_histogram()
+```
+
+Overall the data are quite right skewed with most of the entries locating in the lower ranges and there is a huge gap between the min and max values.
+
+---
+
+Q3:
+
+```{r}
+colleges %>% 
+  ggplot(aes(factor(Private), RoomBoard)) + 
+  geom_boxplot() +
+  xlab("Private or Not") +
+  ylab("Room and Board Costs ($)")
+```
+
+The overall and median costs of rooms and boards are lower in public schools, while private schools can have a more highest costs comparing to its median value (right-skewed).
+
+:::
+
+
+# Simple linear regression
+
+**Research Question**: Haochen claims that there is a positive linear relationship between the number of applications received and the number of applications accepted. Evaluate the evidence in favor of this claim by performing a simple linear regression.
+
+:::{.alert .alert-info}
+
+```{r}
+colleges %>% 
+  select(Apps, Accept) %>% 
+  ggplot(aes(Apps, Accept)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+The scatter plot of these 2 variables can be drawn and it is not hard to see that although the data spreads more while the number of application increases and there is one super large outlier, they overall do fit in to a SLR. This can also be assessed via a Hypothesis Test:
+
+- $H_0$ (Null Hypothesis): There is **NOT** a positive linear relationship between the number of applications received and the number of applications accepted.
+
+- $H_1$ (Alternative Hypothesis): There is a positive linear relationship between the number of applications received and the number of applications accepted.
+
+Now it's time to check the assumptions, the data are quite independent since one University's application accepting rate is literally related to another, for the homoscedasticity and normality:
+
+```{r}
+library(ggfortify)
+fit <- lm(Accept ~ Apps, data = colleges)
+autoplot(fit, which = 1:2)
+```
+
+They are not that quite met since the equal variances are not met if there is a fanning pattern. Normality is also not there since in QQ plot the dots are really not stick to the line and they have heavy tails in the end. 
+
+```{r}
+lm(Accept ~ Apps, data = colleges) -> fit
+summary(fit)
+```
+
+But if we ignore the assumption issue, in the end we got test statistics at 91.587 and the p-value is way smaller than 0.05, this means the null hypothesis can be rejected and we can surely say there is a linear relationship.
+
+:::
+
+# Chi-squared test
+
+**Research Question**: It is claimed that, on average, Chatham College and Lesley College have equal numbers of new enrollments every year, while Stephens College has twice as many yearly enrollments as the two other colleges. Perform a chi-squared test with \(\ \alpha = 0.05 \)\ to determine the statistical significance of any evidence against this claim. In your answer, use H A T P C.
+
+:::{.alert .alert-info}
+
+Hypothesis:
+
+- $H_0$ (Null Hypothesis): There is a 1:1:2 ratio of new enrollments every year fir Chatham College, Lesley College and Stephens College.
+
+- $H_1$ (Alternative Hypothesis): There is no such ratio of new enrollments every year fir Chatham College, Lesley College and Stephens College.
+
+```{r}
+colleges %>% 
+  filter(University == "Chatham College" | University == "Lesley College" | University == "Stephens College") %>% 
+  select(University, Enrol) -> observed
+observed
+```
+
+and the expected ratio is:
+
+```{r}
+expected <- c(.25,.5,.25)
+expected
+```
+
+The assumption of expected values are:
+
+```{r}
+sum(observed$Enrol) * expected
+```
+
+which is met (greater than 5), and then we can perform the test:
+
+```{r}
+mychisq <- chisq.test(observed$Enrol, p = expected)
+mychisq
+```
+
+The test statistic is at 1.6431 and p-value is way greater than 0.05. Thus, at a 5% level of significances, there is no indication of rejecting the null hypothesis, which means there is such a ratio of distribution of new enrollments among these colleges.
+
+:::
+
+
+
+# T-test (100% Tested)
+
+In general, were the cost of books more expensive in **private** colleges compared to **non-private** colleges? 
+
+i) Visualize the relationship between `Private` and `Books`.
+ii) Perform a t-test comparing the mean cost of books between the two types of colleges. Make sure to use H A T P C. *Note: if the assumptions were not met, interpret the results anyway.*
+
+
+:::{.alert .alert-info}
+
+Q1:
+
+```{r}
+colleges %>% 
+  select(Private, Books) %>% 
+  ggplot(aes(factor(Private), Books)) +
+  xlab("Private School or Not") +
+  ylab("Book Costs") +
+  geom_boxplot()
+```
+
+Surprisingly, it seems like having more expensive books in private colleges is not always the case.
+
+Q2:
+
+Hypothesis:
+
+- $H_0$: There is no difference in book costs in private colleges and non-privates.
+
+- $H_1$: There is a difference in book costs in private colleges and non-privates.
+
+```{r}
+# Equal Variances
+colleges %>% 
+  ggplot(aes(y = Books)) +
+  geom_boxplot() +
+  facet_wrap(~ factor(Private))
+
+# Normality
+colleges %>% 
+  ggplot(aes(sample = Books)) +
+  geom_qq() +
+  geom_qq_line() +
+  facet_wrap(~ factor(Private))
+```
+
+For the assumptions, we can see there are issues on both the homoscedascity and normality since the equal variance from private colleges is twice as the non-privates and for the QQ plot, there are no distributions of the data entries following with the QQ line.
+
+But if we interept the tests anyway:
+
+```{r}
+t.test(Books ~ Private, data = colleges, var.equal = FALSE)
+```
+
+We do have test statistic at 0.69 and p-value at 0.49, which provides no confidence on rejecting the null hypothesis. Thus, there is no significant differences in book costs between the private colleges and non-privates.
+
+:::
+
+# Data wrangling
+
+Document the code below using comments (i.e. #) and explain what each line is doing. You may add comments above or beside each line. 
+
+```{r, echo = T, warning = F, message = F, eval = F}
+
+library(tidyverse) # import tidyverse package
+
+boxplot(data$Enrol) # Draw boxplot from data object's Enrol column
+
+df <- data(data$Apps > 50,) # Create dataframe df of data where Apps are greater than 50
+
+# Count how many rows in data that Apps are smaller than 100
+data %>% 
+  filter(data$Apps < 100) %>%
+  dim %>%
+  nrow
+
+# Find the number of accepted applications for all private colleges and non-privates
+data %>%
+  select(Private, Accept) %>% 
+  group_by(Private) %>% 
+  summarise(Accept = sum(Accept))
+
+# Get the largest new enrollments observed in our data.
+data$Enrol %>% 
+  max(., na.rm = T)
+
+```
+
+# End
+
+This is the end of the exam.

@@ -1,0 +1,171 @@
+---
+title: "Lab 1: Review"
+subtitle: "MATH1115 -- Interrogating Data"
+author: "&copy; University of Sydney `r format(Sys.time(), '%Y')`"
+date: 
+output:
+  html_document:
+    code_download: true # embed .Rmd file
+    toc: true  # table of contents
+    toc_depth: 3
+    toc_float: true # toc is always visible when scrolled
+    number_sections: true 
+    df_print: paged # format data frame outputs automatically
+    theme: default # theme the doc
+    highlight: textmate # theme syntax colouring
+---
+
+<!-- ######################################### -->
+<!-- #### Style settings - do not delete! #### -->
+
+```{css newstyles, echo=FALSE}
+body{ /* Most readable font (esp < 8): */
+  font-family: Verdana;
+}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+/* Space Between TOC and 
+Righthand side content on large screens */
+
+@media (min-width: 992px) {
+  .col-md-9 {
+    width: 75%;
+    padding-left: 5em !important;
+  }
+}
+```
+
+```{r setup, include=FALSE}
+# code chunk settings for entire document
+knitr::opts_chunk$set(echo = TRUE,
+                      hide = FALSE)
+```
+
+<!-- #########  End style settings. ########## -->
+<!-- ######################################### -->
+
+
+# Projects
+- Project 1 is worth 10% (report) + 5% (interrogation). 
+- Project 2 is worth 10% (report) + 5% (interrogation).
+
+# Air quality data
+
+## Domain knowledge
+
+What is the background to the `airquality` dataset?
+- ? == man page
+
+```{r}
+# in the console, check the documentation for `airquality` using `?`
+?airquality
+```
+
+## Structure
+
+How big is the data? - dim it 
+```{r}
+dim(airquality)  # check dimensions (row and col)
+```
+
+What are the names of the variables? - names the label
+```{r}
+names(airquality)  # column names if a data frame object is supplied
+```
+
+How has R classified the variables? - str to show the type of each labels
+```{r}
+str(airquality)  # check the structure of `airquality` data
+```
+
+Note: The `str()` function can replace `dim()`, `names()`, and `class()`.
+
+* Because it did there jobs...
+
+## Explore 
+
+Investigate the `Ozone` variable. What can you observe?
+
+```{r}
+# Isolate variable with $
+ozone <- airquality$Ozone
+# Numerical summaries
+length(ozone)
+
+# This should give length of data under Ozone label
+mean(ozone, na.rm = TRUE)  # mean of all values
+median(ozone, na.rm = TRUE)  # median of all values
+sd(ozone, na.rm = TRUE)  # standard deviation
+summary(ozone)  # all summary statistics at once
+```
+Note: the na.rm means removing all the NA values, if they are involved, mean and median cannot be calculated.
+```{r}
+# Graphical summaries
+hist(ozone)
+boxplot(ozone)
+```
+
+You can customise and label your data visualisations to create "better" data summaries. 
+
+```{r}
+# create a histogram using base R
+hist(ozone, 
+     col = "lightgreen",  # modify colour fill of bars
+     xlab = "Mean Ozone (ppb)",  # x-axis label
+     main = "New York Air Quality (May-Sept 1973)")  # add a title
+
+# create a boxplot
+boxplot(ozone,
+        col = "lightgreen",
+        xlab = "Mean Ozone (ppb)",
+        main = "New York Air Quality (May - Sept 1973)")
+```
+
+Reclassify `Month` as a `factor` and then investigate. What can you observe?
+
+```{r}
+## Reclassify variable
+class(airquality$Month)
+monthF <- as.factor(airquality$Month)
+class(monthF)
+
+## view data as a table object
+table(monthF)
+
+barplot(table(monthF)) #Can you make this graph look nicer?
+```
+
+Filter (or facet) your `ozone` data (quantitative) by `months` (qualitative). What can your observe?
+
+```{r}
+boxplot(airquality$Ozone ~ monthF, 
+        names = c("May","June","July","Aug","Sept"),
+        ylab = "New York Air Quality (May-Sept 1973)")
+```
+
+# Import
+
+What is the background to the [BITRE](https://bitre.gov.au/statistics/safety/fatal_road_crash_database.aspx) data:
+
+```{r, eval=TRUE}
+library(readxl)
+input <- read_excel("data/ardd_fatalities_jul2021.xlsx")
+input
+```
