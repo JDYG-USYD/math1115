@@ -11,12 +11,7 @@ library(multicon)
 
 # Summary
 
-Todo:
-
-- Box model
-- Use the Binomial Formula to model chance
-
-A binary trial is where only two things can occur, so, *P*(event) = *p* and *P*(non-event) = 1 - *p*. 
+Binary trial: where only two things can occur, so, *P*(event) = *p* and *P*(non-event) = 1 - *p*. 
 
 - If we have *n* independent, binary trials, with *P*(event) = *p* at every trial, and *n* is fixed; the chance that exactly *k* events occur is 
 
@@ -29,7 +24,9 @@ $$\binom{n}{k}p^x(1-p)^{n-x}$$
 - The box model is a simple way to describe the chance of generating a number. Three things are needed:
 
     1. The distinct numbers that go in the box ("tickets")
+    
     2. The number of each kind of tickets in the box
+    
     3. The number of draws from the box. 
 
 - **Sum** of the random draws from a box model with replacement:
@@ -45,17 +42,20 @@ $$SE~(percentage) = \frac {SE~(sum)}{sample~size} \times 100\%$$
 
 ## Central Limit Theorem
 
-When drawing (a reasonably large number) at random with replacement from a box, the probability histogram (in standard units) for the sum (or average) will follow the normal curve. 
+When drawing (a reasonably large number, like 30) at random with replacement from a box, the probability histogram (in standard units) for the sum (or average) will follow the normal curve. 
 
 # The Box Model
 
 1. What does the "box model" model?
 
-- The chance of generating a number. 
+  - The chance of generating a number. 
 
-- To build the model we need to know:
+  - To build the model we need to know:
+  
     - the distinct numbers that go in the box ("tickets")
+    
     - the number of each kind of tickets in the box
+    
     - the number of **draws** from the box. 
 
 2. Suppose we have a box with 10 1's and 5 0's. We take 20 draws (with replacement) and calculate the sum. What is the mean and standard deviation (SD) of the box?
@@ -67,7 +67,7 @@ draws <-  20
 
 # mean and SD of box
 mean(box)
-popsd(box) #how is popsd() different from sd()? 
+popsd(box) # sd divides N-1, this divides N
 ```
 
 3. What is the expected value (EV) and standard error (SE) of the **sum** of 1's in the sample?
@@ -228,6 +228,7 @@ For mine, it is actually 0, but let's say if it is 0.4.
 ```{r, eval=FALSE}
 choose(8,1)*(0.4)^1*(0.6)^7 # If P(Australian) = 0.4
 dbinom(1,8,0.4)
+# https://www.statology.org/dbinom-pbinom-qbinom-rbinom-in-r/
 ```
 
 3. Simulate Q2.

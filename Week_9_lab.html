@@ -240,12 +240,7 @@
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>Todo:</p>
-<ul>
-<li>Box model</li>
-<li>Use the Binomial Formula to model chance</li>
-</ul>
-<p>A binary trial is where only two things can occur, so, <em>P</em>(event) = <em>p</em> and <em>P</em>(non-event) = 1 - <em>p</em>.</p>
+<p>Binary trial: where only two things can occur, so, <em>P</em>(event) = <em>p</em> and <em>P</em>(non-event) = 1 - <em>p</em>.</p>
 <ul>
 <li>If we have <em>n</em> independent, binary trials, with <em>P</em>(event) = <em>p</em> at every trial, and <em>n</em> is fixed; the chance that exactly <em>k</em> events occur is</li>
 </ul>
@@ -258,9 +253,9 @@
 <ul>
 <li><p>The box model is a simple way to describe the chance of generating a number. Three things are needed:</p>
 <ol style="list-style-type: decimal">
-<li>The distinct numbers that go in the box (“tickets”)</li>
-<li>The number of each kind of tickets in the box</li>
-<li>The number of draws from the box.</li>
+<li><p>The distinct numbers that go in the box (“tickets”)</p></li>
+<li><p>The number of each kind of tickets in the box</p></li>
+<li><p>The number of draws from the box.</p></li>
 </ol></li>
 <li><p><strong>Sum</strong> of the random draws from a box model with replacement:</p></li>
 </ul>
@@ -273,7 +268,7 @@
 </div>
 <div id="central-limit-theorem" class="section level2">
 <h2>Central Limit Theorem</h2>
-<p>When drawing (a reasonably large number) at random with replacement from a box, the probability histogram (in standard units) for the sum (or average) will follow the normal curve.</p>
+<p>When drawing (a reasonably large number, like 30) at random with replacement from a box, the probability histogram (in standard units) for the sum (or average) will follow the normal curve.</p>
 </div>
 </div>
 <div id="the-box-model" class="section level1">
@@ -285,9 +280,9 @@
 <li><p>The chance of generating a number.</p></li>
 <li><p>To build the model we need to know:</p>
 <ul>
-<li>the distinct numbers that go in the box (“tickets”)</li>
-<li>the number of each kind of tickets in the box</li>
-<li>the number of <strong>draws</strong> from the box.</li>
+<li><p>the distinct numbers that go in the box (“tickets”)</p></li>
+<li><p>the number of each kind of tickets in the box</p></li>
+<li><p>the number of <strong>draws</strong> from the box.</p></li>
 </ul></li>
 </ul>
 <ol start="2" style="list-style-type: decimal">
@@ -300,7 +295,7 @@
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># mean and SD of box</span></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(box)</span></code></pre></div>
 <pre><code>## [1] 0.6666667</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">popsd</span>(box) <span class="co">#how is popsd() different from sd()? </span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">popsd</span>(box) <span class="co"># sd divides N-1, this divides N</span></span></code></pre></div>
 <pre><code>## [1] 0.4714045</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>What is the expected value (EV) and standard error (SE) of the <strong>sum</strong> of 1’s in the sample?</li>
@@ -445,7 +440,8 @@
 <li>If Spotify randomly chooses 8 songs from your list (with replacement), what is the chance that just 1 of the artists are Australian?</li>
 </ol>
 <div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">choose</span>(<span class="dv">8</span>,<span class="dv">1</span>)<span class="sc">*</span>(<span class="fl">0.4</span>)<span class="sc">^</span><span class="dv">1</span><span class="sc">*</span>(<span class="fl">0.6</span>)<span class="sc">^</span><span class="dv">7</span> <span class="co"># If P(Australian) = 0.4</span></span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dbinom</span>(<span class="dv">1</span>,<span class="dv">8</span>,<span class="fl">0.4</span>)</span></code></pre></div>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dbinom</span>(<span class="dv">1</span>,<span class="dv">8</span>,<span class="fl">0.4</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co"># https://www.statology.org/dbinom-pbinom-qbinom-rbinom-in-r/</span></span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>Simulate Q2.</li>
 </ol>

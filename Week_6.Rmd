@@ -130,8 +130,11 @@ plot(olym)
 ```
 
 What patterns can we see? 
-- There are factors - gender
+
+- There are factors
+
 - Countries biased
+
 - Year and time
 
 How many gold medal records are won each year?

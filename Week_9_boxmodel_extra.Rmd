@@ -68,13 +68,10 @@ box <- c(1,2,3)
 
 # Step2: calculate the Mean and SD of the box
 mean_box <- mean(box)
-popsd_box <- sqrt((length(box)-1)/length(box) * sd(box))
+# popsd_box <- sqrt((length(box)-1)/length(box) * sd(box))
 
-## Alternatively, we could use the `popsd()` function in the multicon package:
-# library(multicon) # install.packages("multicon")
-# popsd_box <- popsd
-
-# We will continue to use `popsd()` for the rest of this demo.
+library(multicon)
+popsd_box <- popsd(box)
 
 # Step3: Calculate the EV and SE of the SUM of the sample
 ev <- 25 * mean_box
@@ -96,7 +93,7 @@ pnorm(su2)-pnorm(su1)
 # Quicker way
 pnorm(55,ev,se)-pnorm(50,ev,se)
 
-## Adjust your calculation, using the continuity correction?  Why do we use it?
+# Adjust your calculation, using the continuity correction?  Why do we use it?
 pnorm(49.5,ev,se)-pnorm(55.5,ev,se)
 ```
 
@@ -139,7 +136,7 @@ For the remainder of the lab, go through the following exercises. **In the code 
 In which of the following scenarios could the CLT be applied to the sample sum or sample mean? Justify your answer.
 
 - We extract samples of size 1 from a symmetric distribution.
-- We extract samples of size 30 from a symmetric distribution.
+- We extract samples of size 30 from a symmetric distribution.(-)
 - We extract samples of size 30 from an asymmetric distribution.
 - We extract 100 samples from an asymmetric distribution.
 
@@ -151,7 +148,7 @@ Method: Use `replicate` to simulate 1000 samples of 10 draws (and then 100 draws
 
 Take 10 draws from a box with population 0,1 [1000 replicates]
 
-```{r, results='hide', fig.show='hide'}
+```{r}
 set.seed(1)
 box <- c(0, 1)
 totals <- replicate(1000, sum(sample(box, 10, rep = TRUE)))
@@ -163,7 +160,7 @@ hist(totals, nclass = 20)
 
 Take 100 draws from a box with population 0,1 [1000 replicates]
 
-```{r, results='hide', fig.show='hide'}
+```{r}
 set.seed(1)
 box <- c(0,1)
 totals <- replicate(1000, sum(sample(box, 100, rep = TRUE)))
@@ -179,7 +176,7 @@ Experiment to find out what minimum size number of draws it takes, for the distr
 
 Take 10 draws from a box with the population 0,1,1,1,1,1,1 [1000 replicates]
 
-```{r, results='hide', fig.show='hide'}
+```{r}
 set.seed(1)
 box <- c(0,1,1,1,1,1,1)
 totals <- replicate(1000, sum(sample(box, 10, rep = TRUE)))
@@ -191,7 +188,7 @@ hist(totals, nclass = 20)
 
 Take 100 draws from a box with the population 0,1,1,1,1,1,1 [1000 replicates]
 
-```{r, results='hide', fig.show='hide'}
+```{r}
 set.seed(1)
 box <- c(0, rep(1, 6)) # alternative to c(0,1,1,1,1,1,1)
 totals <- replicate(1000, sum(sample(box, 100, rep = TRUE)))

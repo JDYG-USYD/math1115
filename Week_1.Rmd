@@ -75,7 +75,7 @@ What is the background to the `airquality` dataset?
 
 ```{r}
 # in the console, check the documentation for `airquality` using `?`
-?airquality
+# ?airquality
 ```
 
 ## Structure
