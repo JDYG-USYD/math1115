@@ -1,0 +1,498 @@
+---
+title: "MATH1115 Exam"
+subtitle: "Semester 2, 2021" 
+output: 
+  html_document:
+    code_download: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: no
+    theme: default
+    highlight: tango
+---
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 24px;
+}
+h3 { /* Resize header 3: */
+  font-size: 16px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+  }
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Instructions {-}
+
+## Getting started {-}
+
+1. You have been provided a data file `uscrime.csv` and *this* R Markdown file to complete the exam.
+2. Read the data briefing. It will provide useful information about the variables in the dataset.
+3. Attempt all questions.
+4. All answers **must** be presented in the appropriate sections and *numbered* according to the question.
+5. All plots **must** be in `ggplot2`. Note that diagnostic plots (Residual, QQ plots) that are used to test for data assumptions may remain as base R plots.
+6. **Do not edit this template.** Only provide answers in the appropriate blocks (see below).
+7. For all hypothesis testing questions, unless stated otherwise, assume that $\alpha = 0.05$.
+
+## Writing your answers
+
+- All answers should be written within the answer alert blocks provided. These alert boxes look like below in the source document:
+
+```
+::: {#answer .alert .alert-info}
+
+Write your answers within this block, including code chunks.
+
+:::
+
+```
+
+
+## Submission {-}
+
+1. When the time is up (100 min), you will have 15 minutes to submit your assignment.
+2. **Only .html file submissions are accepted.** 
+3. You will not be able to submit an incomplete .Rmd file.
+4. Rename your final file to `XXXXXXXXXX_MATH1115_Exam.html` where `XXXXXXXXXX` is your SID.
+
+## Acknowledgement {-}
+
+Please acknowledge that you have read the instructions above by replacing `XXXXXXXXXX` with your SID. 
+
+::: {.alert .alert-info}
+**I have acknowledged the instructions in this file. My SID is**: 
+
+470033070
+
+:::
+
+# Data briefing {-}
+
+## Data description {-}
+
+The data file, `uscrime.csv` is a record of crime in 47 states in the USA from an unspecified year. The variables are listed below. Please be aware of the measurement units used in the data.
+
+- `location_state`: instead of State names, all states have been indexed from 1 to 47
+- `state_size`: size of state (by no. of individuals), in hundred thousands
+- `crime_rate`: crime rate (offences per million individuals)
+- `youth`: young individuals aged 18-24, per 1000
+- `northsouth`: identifies whether the data is from a Northern or Southern state in USA
+- `yrs_education`: average length of education per person, in years
+- `youth_employed`: young individuals, aged 18-24, employed per 1000
+- `mf_ratio`: proportion of males to females in the state, where values > 1.0 indicate more males than females. This value is obtained by dividing the number of males from number of females. Note that this is a fairly old (>10 years) dataset, therefore age has been recorded as a binary variable
+- `mature_unemployment`: number of individuals aged 35-39 who are unemployed, per 1000 individuals
+- `high_youth_unemployment`: indicates whether there are 3 times more youth unemployed compared to mature
+- `median_income`: median weekly income per person
+- `income_below_median`: number of families (not individuals) earning below median income per 1000
+
+
+# Initial data analysis
+
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+
+## Task 1: Data import [1 mark]
+Read `uscrime.csv` into your R Markdown file such that the code below works. Your data object should be called `crime`. **Set `eval=TRUE` once done.**
+
+```{r}
+crime <- read.csv("data/uscrime.csv")
+```
+
+## Task 2: Data exploration [9 marks]
+
+Using R code, display the structure of the data, and answer the questions below.
+
+a. What is the size of the data? 
+b. Which two variables can be used as factors in this dataset? Explain your choices briefly. 
+c. Summarise the median wage data. What interesting thing can you say about the median wages across the different states? 
+d. What is the average crime rate for Southern states? 
+e. Which States (use `location_state`) have the highest, and the lowest, number of individuals aged 35-39 who are unemployed (use `mature_unemployment`)? 
+
+:::{.alert .alert-info}
+
+a. 
+```{r}
+dim(crime)
+```
+
+This data have 47 observations with 12 variables.
+
+---
+
+b.
+```{r}
+glimpse(crime)
+```
+
+The data can be factorized is `location_state` and `high_youth_unemployment`, since the first one is indexing states with numbers and the latter is 0 or 1 indicating employed or not.
+
+---
+
+c.
+```{r}
+summary(crime$median_income)
+```
+
+The difference between the state has the highest median wage and the one has the lowest is quite huge, though the data are slightly left-skewed, which means most of the states are having preferable median wages.
+
+---
+
+d.
+```{r}
+crime %>% 
+  filter(northsouth == "south") %>% 
+  select(crime_rate) -> south_crime_rate
+
+sum(south_crime_rate) / dim(south_crime_rate)[1]
+```
+
+It's 100.6813.
+
+---
+
+e.
+```{r}
+crime %>% 
+  arrange(mature_unemployment) -> ordered_mu
+
+tail(ordered_mu, 1)$location_state
+head(ordered_mu, 1)$location_state
+```
+
+State 40 has the highest number of individuals aged 35-39 who are unemployed and State 28 has the lowest
+
+:::
+
+## Task 3: Data limitations [6 marks]
+
+It is important to consider ethical issues and limitations when working with crime data.
+
+a. Provide at least one ethical consideration associated with the collection of the `crime` data, using a variable of your choice as an example. 
+b. Explain briefly, in one to two sentences, how this dataset might be useful to a stakeholder. Clearly specify the stakeholder in your answer. 
+c. Describe a limitation of the data, based on how a variable has been recorded. How would you improve data collection for that variable? You may use other variables to provide context to this answer. 
+
+:::{.alert .alert-info}
+
+a. The main ethical consideration here is the usage of variables that relates to people's information, such as `yrs_education` and the employment status variables, individuals invovled with their information may have no idea about this statistic study is using their information.
+
+---
+
+b. This data set clearly reflects how crime rate is relating to some other attributes in different US states, stakeholder like state government or federal government can use this to evaluate which state has the lowest crime rate and encourage to reduce it.
+
+---
+
+c. The most obvious one is `northsouth` which means to record location-wise information about this state to reflect a geographical performance, but only having "north" and "south" is too shabby, could be more detailed. One more example is `income_below_median` as just numbers of families, this could be a ratio like `mf_ration` to indicate a proportion as a better choice.
+
+:::
+
+
+# Data cleaning and visualisation
+
+## Task 4: Data cleaning [2 marks]
+
+
+Convert the two variables identified in **Task 2b** into factors, and save them back into the `crime` data frame object. 
+
+:::{.alert .alert-info}
+
+```{r}
+crime %>% 
+  mutate(location_state = factor(location_state)) %>% 
+  mutate(high_youth_unemployment = factor(high_youth_unemployment)) -> crime
+```
+
+:::
+
+
+## Task 5: Data visualisation [7 marks]
+
+Using **only** `ggplot2` or numerical summaries, in 1 to 2 sentences, answer each of the the following questions based on the patterns that you see, making sure that the plot axes are well-labelled and (for histograms) an appropriate bin width is selected. 
+
+a. Is there a relationship between median income and crime rate? 
+b. Is crime rate normally distributed? 
+c. Do Northern US states have more young individuals aged 18-24 compared to Southern US states? 
+
+:::{.alert .alert-info}
+
+a.
+```{r}
+crime %>% 
+  ggplot(aes(median_income, crime_rate)) +
+  geom_smooth(method = "lm") +
+  geom_point() +
+  xlab("Median Income (USD$)") +
+  ylab("Crime Rate (Per Million)") + 
+  theme_minimal()
+```
+
+Yes, there is a positive correlated linear relationship between them.
+
+---
+
+b.
+```{r}
+boxplot(crime$crime_rate)
+```
+
+Yes since the boxplot has no long tails on either left or right hand side.
+
+---
+
+c.
+```{r}
+sum(crime %>% filter(northsouth == "north") %>% select(youth)) > sum(crime %>% filter(northsouth == "south") %>% select(youth))
+```
+
+Yes as above.
+
+:::
+
+
+# Data analysis
+
+## Task 6: Test for means [10 marks]
+
+> Research question 1: Do Northern US states have a higher crime rate?
+
+a. Visualise the relationship between `northsouth` and mean `crime_rate` with an appropriate plot using `ggplot2`. Be sure to appropriately label your axes. 
+b. Formulate appropriate null and alternate hypotheses based on the question above. 
+c. Test your hypotheses with a statistical test, making sure that you have checked your assumptions before presenting your test statistic, p-value, results and conclusions. 
+d. Form a conclusion within context of your results and the research question. 
+
+:::{.alert .alert-info}
+
+a. 
+
+```{r}
+crime %>% 
+  ggplot(aes(northsouth, crime_rate)) + 
+  geom_boxplot() + 
+  xlab("North or South") +
+  ylab("Mean of Crime Rate (Per Minion)")
+```
+
+---
+
+b.
+
+Hypothesis:
+
+- $H_0$: There are no differences of crime rate on whether the state is northern US or not.
+
+- $H_1$: There are significant differences there.
+
+---
+
+c.
+
+Assumption:
+
+```{r}
+crime %>% 
+  ggplot(aes(y = crime_rate)) +
+  geom_boxplot() +
+  facet_wrap(~ factor(northsouth))
+
+crime %>% 
+  ggplot(aes(sample = crime_rate)) +
+  geom_qq() +
+  geom_qq_line() +
+  facet_wrap(~ factor(northsouth))
+```
+
+The assumption is quite not satisfying on both the homoskedasticity and normality, the variance of the north is almost 3 times of the south and there are both lots of outliers on the QQ plot making the dots distributed quite off the line.
+
+But if we continue our test, we can get:
+```{r}
+t.test(crime_rate ~ northsouth, data = crime, var.eqaul = F)
+```
+
+Above we got the test statistic at 0.4 and P-value at 0.7 which is quite larger than 0.05, which means we can't reject the null hypothesis at all. Thus there is a huge difference between the crime rates in north and south of the United States.
+
+---
+ 
+d. There are huge differences between the crime rates in north and south of the America, leading the northern US states have a higher crime rate possible.
+
+:::
+
+## Task 7: Test for relationships [10 marks]
+
+> Research question 2: Is high youth unemployment independent of geolocation (i.e. north vs south)?
+
+a. Summarise `northsouth` an `high_youth_unemployment` by counts  (e.g. in a contingency table or data frame). 
+b. Using a statistical test, determine if high youth unemployment (`high_youth_unemployment`) is independent of State (Northern or Southern; `northsouth`). Make sure that you fully articulate your hypotheses, assumptions, test statistic, p-value, and results and conclusion. 
+c. Form a conclusion within context of your results and the research question. 
+
+:::{.alert .alert-info}
+
+a.
+```{r}
+crime %>% 
+  select(northsouth, high_youth_unemployment) %>% 
+  group_by(northsouth) %>%
+  count(high_youth_unemployment) 
+
+hyu_ns <- data.frame(c(17,14), c(15,1))
+rownames(hyu_ns) <- c("north", "south")
+colnames(hyu_ns) <- c(0,1)
+hyu_ns
+```
+
+---
+
+b.
+Hypothesis:
+
+- $H_0$: They are independent from each other.
+
+- $H_1$: They are dependent from each other.
+
+Assumption:
+
+- Data was collected independently.
+
+- There are no expected cell counts lower than 5:
+```{r}
+(17 + 14 + 15 + 1) / 4 > 5
+```
+
+Now we can perform the test:
+
+```{r}
+chisq.test(table(crime$northsouth, crime$high_youth_unemployment))
+```
+
+Here we have test statistic at 5.6717 with P-value at around 0.01, which is smaller than 0.05. Thus we can reject the null hypothesis and claim these 2 variables are dependent.
+
+---
+
+c. Whether the state is in north or south of the America is related to whether the youth are employed or not.
+
+:::
+
+
+## Task 8: Linear model [10 marks]
+
+> Research question 3: Is there a linear relationship between median income and the average length of education?
+
+It is thought that an increase in average length of education (`yrs_education`) will also lead to an increase in median income. Test this relationship with a linear model:
+
+a. Visualise the relationship with a plot using `ggplot2`. 
+b. Fit a linear model to the data. 
+c. Test the assumptions of the model. Are they appropriate? 
+d. If the data meets the assumptions, interpret the results and form a conclusion that is within context of the hypotheses tested, the test statistic, and p-value. Otherwise, suggest how you would re-analyse the data. 
+
+
+:::{.alert .alert-info}
+
+a.
+```{r}
+crime %>% 
+  ggplot(aes(yrs_education, median_income)) +
+  geom_smooth(method = "lm") +
+  geom_point() +
+  xlab("Average Length of Education (Yrs.)") +
+  ylab("Median Income (USD$)") +
+  theme_bw()
+```
+
+---
+
+b.
+```{r}
+fit <- lm(median_income ~ yrs_education, data = crime)
+fit
+```
+
+---
+
+c.
+```{r}
+library(ggfortify)
+autoplot(fit, which = 1:2)
+```
+
+Although independence may be there based on how the data was collected, the big frowny-face pattern and the giant residual distribution difference mean the homoskedasticity and equal variance are no longer there. The normality is acceptable though even with some outliers at the ends of left and right sides, the dots distribute along the diagonal line in general.
+
+---
+
+d.
+
+Since the assumption is not met from my point of view and it's mostly because variance and homoskedasticity issues, removing outliers would be the first thing to do so these assumptions can be met, as the outliers are also damaging the normality a bit as well.
+
+:::
+
+
+# Data reproducibility and interpretation
+
+## Task 9: Document and interpret [10 marks]
+
+In your own words, explain the following code at **every line**, by either annotating the code using comments `#` within the code chunks, or in the main text. You may use the `?help` documentation and run the code on your own to help you with the process. 
+
+
+```{r, eval=FALSE}
+# (a)
+pop <- # Assign what's in the right hand to object "pop"
+  crime %>% # Start data pipeline with object "crime"
+  select(location_state, state_size, northsouth) %>% # Select column "location_state", "state_size" and "northsouth" from the data piped above and continue piping
+  mutate(state_size = state_size/10) # Modify "state_size" by dividing 10 for all observations
+```
+
+```{r, fig.height = 8, eval=FALSE}
+# (b)
+ggplot(pop, aes(state_size, reorder(location_state, state_size))) + # Initialize a ggplot request based on object data "pop" with x-axis with state's number of people (state_size) and y-axis with state's index ordered by the size.
+  geom_bar(aes(fill = northsouth), stat = "identity") + # Make a bar chart with colour fill indicating "northsouth" and bar indicates values as data is.
+  xlab("Population count (in millions)") + # Label the x-axis "Population count (in millions)"
+  ylab("State ID") + # Label the y-axis "State ID"
+  labs(fill = "State", # Label the legend "State"
+       title = "Population of Northern and Southern States in the USA") + # Title the plot as "Population of Northern and Southern States in the USA"
+  scale_fill_manual(values = c("peru", "seagreen"), # Assign colours to be filled on the bars.
+                    labels = c("Northern","Southern")) # Based on northsouth's value, either "Northern" or "Southern", draw peru and seagreen colours on the bars.
+```
+
+```{r, eval=FALSE}
+# (c)
+crime %>% # Start data pipeline with object "crime"
+  mutate(mf_majority = case_when( # Change variable "mf_majority" with conditions
+    mf_ratio > 1 ~ "male", # If mf_ration is greater than 1, assign "male" to "mf_majority" for this observation.
+    TRUE ~ "female" # Except all the other cases, assign "female" to "mf_majority" for this observation.
+  )) %>% # Piping
+  count(mf_majority) # Count how many males and females in "mf_majority"
+```
+
+
+# Finish
+
+This is the end of the exam. Make sure to read the submission instructions again before uploading your knitted file to Canvas.
+
+# Reproducibility
+
+**Do not delete the information below.**
+```{r, echo=FALSE}
+Sys.time()
+sessionInfo()
+Sys.info()
+```
+
