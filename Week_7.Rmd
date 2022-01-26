@@ -1,7 +1,34 @@
 ---
 title: "Regression Tests & Non-Linear Models"
+author: "Dongyi Guo"
 output: rmdformats::robobook
 ---
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1, h2 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 22px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+a { /* Link colours */
+  color: blue;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+}
+
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)

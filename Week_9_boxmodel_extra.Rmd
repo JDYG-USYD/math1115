@@ -1,19 +1,8 @@
 ---
 title: "DATA1001/1901 Topic 7"
-subtitle: "Chance Variability"
-author: "© University of Sydney 2021"
-output:
-  html_document:
-    code_download: true # embed .Rmd file
-    toc: true  # table of contents
-    toc_depth: 3
-    toc_float: true # toc is always visible when scrolled
-    number_sections: true 
-    theme: sandstone # theme the doc
-    highlight: tango # theme syntax colouring
+author: "Dongyi Guo"
+output: rmdformats::robobook
 ---
-
-
 
 ```{css newstyles, echo=FALSE}
 h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
@@ -24,9 +13,6 @@ h1, h2 { /* add border to h1 and h2 */
 }
 h2 { /* Resize header 2: */
   font-size: 22px;
-}
-h3 { /* Resize header 2: */
-  font-size: 18px;
 }
 body { /* Make main text colour black */
   color: black;
@@ -43,14 +29,6 @@ a { /* Link colours */
 }
 
 ```
-
-*Note that this document has been updated in 2021 and may look slightly different from the lab videos.*
-
-# Live Demo 
-
-## Simulations
-
-We will use the same boxes from Challenge, so you can compare your results.
 
 ## Box 1
 

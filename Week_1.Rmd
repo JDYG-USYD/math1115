@@ -1,18 +1,7 @@
 ---
-title: "Lab 1: Review"
-subtitle: "MATH1115 -- Interrogating Data"
-author: "&copy; University of Sydney `r format(Sys.time(), '%Y')`"
-date: 
-output:
-  html_document:
-    code_download: true # embed .Rmd file
-    toc: true  # table of contents
-    toc_depth: 3
-    toc_float: true # toc is always visible when scrolled
-    number_sections: true 
-    df_print: paged # format data frame outputs automatically
-    theme: default # theme the doc
-    highlight: textmate # theme syntax colouring
+title: "Review"
+author: "Dongyi Guo"
+output: rmdformats::robobook
 ---
 
 <!-- ######################################### -->
@@ -60,11 +49,6 @@ knitr::opts_chunk$set(echo = TRUE,
 
 <!-- #########  End style settings. ########## -->
 <!-- ######################################### -->
-
-
-# Projects
-- Project 1 is worth 10% (report) + 5% (interrogation). 
-- Project 2 is worth 10% (report) + 5% (interrogation).
 
 # Air quality data
 
