@@ -43,6 +43,7 @@ Righthand side content on large screens */
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 <!-- #########  End style settings. ########## -->
@@ -265,49 +266,51 @@ Create a boxplot using 2 variables: `Ozone` and `Month` with the following condi
 3. `Month` is renamed to the months May -- Sep, instead of numbers
 4. `Month` is arranged by date when plotted
 5. All boxplots are filled with the colour `"firebrick"`
-6. A theme of your choice is applied to the entire plot.
-
-Hints:
-
-These are real web browser searches. By default, we are using the Google search engine to process these keywords.
-
-- [ggplot rename x axis names](https://www.google.com/search?q=ggplot+rename+x+axis+names)
-- [ggplot reorder a variable](https://www.google.com/search?q=ggplot+reorder+a+variable)
-- [ggplot change boxplot colour](https://www.google.com/search?q=ggplot+change+boxplot+colour)
-- [ggplot add theme](https://www.google.com/search?q=ggplot+add+theme)
+6. A theme of your choice is applied to the entire plot
 
 ```{r}
-# create your plot here
+airquality %>% 
+  mutate(Month = case_when(
+    Month == 5 ~ "May",
+    Month == 6 ~ "Jun",
+    Month == 7 ~ "Jul",
+    Month == 8 ~ "Aug",
+    Month == 9 ~ "Sept",
+  )) %>% 
+  ggplot(aes(y = Ozone, x = factor(Month,levels = month.abb))) +
+  xlab("Month") +
+  geom_boxplot(color = "firebrick") +
+  theme_minimal()
 ```
 
 
 # Explore: multivariate plot
 
-We will improve on the scatterplot that was produced in the Demo.
-
-```{r, message=FALSE, warning=FALSE}
-ggplot(airquality, aes(Solar.R, Temp, colour = factor(Month))) +
-  geom_point() +
-  geom_smooth(method = "lm") +  
-  xlab("Solar radiation (Angstroms)") +  
-  ylab(expression("Temperature " ( degree*C))) +
-  facet_wrap(~ Month)
-
-```
-
+We will improve on the scatterplot that was produced in the Demo:
 1. Rename the months from numbers to May -- Sep
 2. Rename the Legend title from `"factor(Month)"` to `"Month"`
 3. Rearrange the facet so that it is wrapped in two columns, not three columns.
 4. Instead of a universal scale, make it such that each plot has its own individual y-axis that is scaled for the data.
 5. Move the legend from the right side of the canvas to the top.
 
-Hints:
-
-Search for these keywords yourself:
-
-- ggplot facet_wrap column number
-- ggplot facet_wrap individual scale 
-- ggplot move legend position top
+```{r, message=FALSE, warning=FALSE}
+airquality %>% 
+  mutate(Month = case_when(
+    Month == 5 ~ "May",
+    Month == 6 ~ "Jun",
+    Month == 7 ~ "Jul",
+    Month == 8 ~ "Aug",
+    Month == 9 ~ "Sept"
+  )) %>% 
+  ggplot(aes(Solar.R, Temp, colour = factor(Month,levels = month.abb))) +
+  geom_point() +
+  geom_smooth(method = "lm") +  
+  xlab("Solar radiation (Angstroms)") +  
+  ylab(expression("Temperature " ( degree*C))) +
+  scale_fill_discrete(name = "Month") +
+  facet_wrap(~ Month, ncol = 2, scales = "free") +
+  theme(legend.position = "top")
+```
 
 # Explore: road fatalities
 

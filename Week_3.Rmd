@@ -1,5 +1,5 @@
 ---
-title: "Lab 3: Data wrangling"
+title: "Data wrangling"
 author: "Dongyi Guo"
 output: rmdformats::robobook
 ---
@@ -80,7 +80,7 @@ When your actions are simplified in steps, debugging issues in code becomes much
 
 ## Basics of data wrangling
 
-- **data import** to **data manipulation** to a end of**data summary** or **data visualisation**.
+- **data import** to **data manipulation** to a end of **data summary** or **data visualisation**.
 
 1. **Data import**: `read_csv()`, `read_excel()`
 2. **Data manipulation**:
