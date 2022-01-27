@@ -35,6 +35,7 @@ a { /* Link colours */
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 <!-- #########  End style settings. ########## -->
@@ -118,7 +119,7 @@ mtcars %>%    # using the mtcars dataset,
   glimpse()   # view its structure
 ```
 
-This is literally `glimpse(.)` or `glimpse(.)`, in R . means the returned object itself.
+This is literally `glimpse(.)` or `glimpse(.)`, in R `.` means the returned object itself.
 The pipe makes mtcars return itself and passed into glimpse().
 
 
@@ -148,8 +149,7 @@ Using the `mtcars` data, we will
 ```{r}
 mtcars %>%
   select(1) %>% # Select the first column of mtcars dataset 
-  arrange(desc(mpg)) ->
-  arrange_mpg
+  arrange(desc(mpg)) -> arrange_mpg
 
 # print
 arrange_mpg
@@ -241,7 +241,8 @@ test <- read_csv("data/Titanic_test.csv")
 ```
 
 ```{r}
-# add your code below
+dim(train)
+dim(test)
 ```
 
 ## A small(ish) dataset
@@ -259,6 +260,8 @@ mean_fare
 sd_fare
 ```
 
+Not given, we don't know.
+
 How do these fares compare to today's prices?
 [Prices](https://autumnmccordckp.weebly.com/tickets-and-accomodations.html)
 
@@ -271,6 +274,14 @@ train %>%
 ```
 
 What would the code look like without the `%>%` operator?
+
+```{r}
+male <- filter(train, Sex == "male")$Age
+female <- filter(train, Sex == "female")$Age
+mean(male, na.rm = TRUE)
+mean(female, na.rm = TRUE)
+```
+
 
 **Question**: What was the survival rate for males and females?
 

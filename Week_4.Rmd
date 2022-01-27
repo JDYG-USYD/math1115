@@ -1,5 +1,5 @@
 ---
-title: "Lab 4: Data pipelines & the grammar of graphics (gg)"
+title: "Data pipelines & Grammar of Graphics"
 author: "Dongyi Guo"
 output: rmdformats::robobook
 ---
@@ -51,8 +51,6 @@ In this lab we will:
 - combine what we have learned in Weeks 2 and 3 to create data efficient and tidy **data pipelines**, based on the tidyverse;
 - produce presentable **boxplots**, **bar** charts and **scatter plots**.
 
-
-
 # Demo
 
 Let's consider the `iris` dataset.
@@ -75,7 +73,7 @@ From `plot()` we can observe that:
 - Separations
 - Groups
 - There are patterns of "clustering", which can be explored (because of observation below)
-- One variable is clearly a factor or ordinal. It can be used to investigate differences due to the factor
+- One variable is clearly a factor or ordinal. It can be used to investigate differences due to the factor.
 
 
 ## Univariate patterns
@@ -93,7 +91,7 @@ iris %>%
   #This gives format like category(name): value(value) for all the entries in data
   
   ggplot(aes(value)) +           # plot
-  geom_histogram() +
+  geom_histogram(binwidth = 0.1) +
   facet_wrap(~ name, scales = "free") +  # view by facet
   geom_blank() # why is this useful?
 ```
@@ -194,7 +192,7 @@ diamonds %>%
   geom_blank()
 ```
 
-Bsed on the histograms we can observe that:
+Based on the histograms we can observe that:
 
 - `price` is very right-skewed, which is worth investigating
 - `carat` shows that high carat diamonds are rare in this dataset
@@ -215,6 +213,10 @@ diamonds %>%
 ```
 
 What are your conclusions?
+
+They are linear indeed.
+
+Except I1, there are no significant difference in between the rest, so no, we just had one really special case.
 
 > **Research question**: What is the total worth of all the diamonds in this dataset, based on colour?
 

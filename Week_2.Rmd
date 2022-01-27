@@ -329,17 +329,14 @@ Read the `AllFatalities.csv` file into R and save it as an object, e.g. `fatalit
 
 ```{r}
 # read the .csv file `ardd_fatalities_nov2020.csv`
+fatal <- readxl::read_excel("data/ardd_fatalities_jul2021.xlsx")
 
 # use this to check if your data file is in the same directory 
 # as this .Rmd file: 
-# list.files() 
-
+list.files()
 # use this to determine the working directory of
 # this .Rmd file:
-# getwd()
-
-# example code:
-# fatalities <- read.csv("data/AllFatalities.csv")
+getwd()
 ```
 
 - Investigate the structure of the data. What variables are interesting?
