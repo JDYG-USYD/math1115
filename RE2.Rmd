@@ -1,0 +1,535 @@
+---
+title: "MATH1115 Replacement 1 Exam"
+subtitle: "Semester 2, 2021" 
+output: 
+  html_document:
+    code_download: true
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: no
+    theme: default
+    highlight: tango
+---
+
+```{css newstyles, echo=FALSE}
+h1, .h1, h2, .h2, h3, .h3 { /* Add space before headings: */
+    margin-top: 56px;
+}
+h1 { /* add border to h1 and h2 */
+  border-bottom: solid 1px #666;
+}
+h2 { /* Resize header 2: */
+  font-size: 24px;
+}
+h3 { /* Resize header 3: */
+  font-size: 16px;
+}
+body { /* Make main text colour black */
+  color: black;
+}
+.tocify { /* Some toc fixes*/
+  width: 100% !important;
+  border: none; /* remove border */
+}
+.tocify-header { /* fix for horrible indent in toc */
+  text-indent: initial;
+  }
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(multicon)
+library(ggfortify)
+library(tidyverse)
+```
+
+
+# Instructions {-}
+
+## Getting started {-}
+
+1. You have been provided a data file, `credit.csv` and *this* R Markdown file to complete the exam.
+2. Read the data briefing. It will provide useful information about the variables in the dataset.
+3. Attempt all questions. You have **100 minutes**, including reading time of 10 minutes. 
+4. All answers **must** be presented in the appropriate sections and *numbered* according to the question.
+5. All plots **must** be in `ggplot2`. Note that diagnostic plots (Residual, QQ plots) that are used to test for data assumptions may remain as base R plots.
+6. **Do not edit this template.** Only provide answers in the appropriate blocks (see below).
+7. For all hypothesis testing questions, unless stated otherwise, assume that $\alpha = 0.05$.
+
+
+## Submission {-}
+
+1. When the time is up (100 min), you will have 15 minutes to submit your assignment.
+2. **Only .html file submissions are accepted.** 
+3. You will not be able to submit an incomplete .Rmd file.
+4. Rename your final file to `XXXXXXXXXX_MATH1115_Exam.html` where `XXXXXXXXXX` is your SID.
+
+## Acknowledgement {-}
+
+Please acknowledge that you have read the instructions above by replacing `XXXXXXXXXX` with your SID. 
+
+::: {.alert .alert-info}
+**I have acknowledged the instructions in this file. My SID is**: 
+
+470033070
+
+:::
+
+# Data briefing {-}
+
+## The data file, `Credit.csv` {-}
+
+The dataset `Credit.csv` contains financial and personal information of credit card customers in a local bank.
+The variables are:
+
+-   `ID`: A unique identification number that indexes an individual anonymously.
+-   `Income`: Income, in \$10,000's.
+-   `Limit`: Credit limit. This is the maximum amount that can be charged to the credit card.
+-   `Rating`: Credit rating. An individual with a higher credit rating is more likely to manage debt responsibly.
+-   `Cards`: Total number of credit cards owned by the individual.
+-   `Age`: Age of individual, in years.
+-   `Education`: A measure of individual education level, quantified by year.
+-   `Gender`: Male or Female. Indicates the gender of the individual. Note that is is a fairly old dataset, therefore gender has been coded as binary.
+-   `Student`: A "Yes" indicates whether the individual is currently a student.
+-   `Married`: A "Yes" indicates whether the individual is currently married.
+-   `Ethnicity`: African American, Asian, or Caucasian. Indicates the individual's ethnicity.
+-   `Balance`: Average credit card balance, in \$, over 12 months.
+
+## Research task {-}
+
+You are a data scientist working on credit risk in the bank.
+Your supervisor, Andy, has asked you to analyse the data to identify customers who are less likely to repay their debts in time. 
+You will perform the initial data exploration to see patterns in the data, before the data is passed on for machine learning analysis.
+Andy plans to hand over the final results to the customer service, who will contact at-risk individuals to provide financial assistance.
+
+# Initial data analysis
+## Task 1: Data import
+
+Read `credit.csv` into your R Markdown file such that the code below works. **Don't forget to set `eval=TRUE`.** Your data object should be called `credit`. [2 marks]
+
+```{r}
+credit <- read.csv("data/credit.csv")
+```
+
+## Task 2: Data structure
+
+Evaluate the structure of the dataset and its variables.
+Using your code and R output as evidence, answer the following questions:
+
+(a) How many different variables are there in the dataset? [1 mark]
+(b) How many individuals (customers) are there in the dataset? [1 mark]
+(c) How many unique values are there for the variable `Ethnicity`?  [2 marks]
+(d) What is the mean `Age`, for each `Gender`? [2 marks]
+
+:::{.alert .alert-info}
+
+(a) 13
+
+---
+
+(b) 400
+
+---
+
+(c) 
+
+```{r}
+table(credit$Ethnicity)
+```
+
+So there are 3.
+
+---
+
+(d) 
+
+```{r}
+credit %>% 
+  group_by(Gender) %>% 
+  summarise(meanAge = mean(Age, na.rm = T))
+```
+
+:::
+
+
+## Task 3: Data limitations
+
+While the data has been made anonymous, it is important to think about professional ethical standards when working with financial information.
+
+(a) Describe a limitation that is associated with how the data may be collected. Use one or more variables in the dataset as an example or examples. [2 marks]
+(b) Explain briefly, in one or two sentences, how the data might be used unethically by the bank to make decisions. [2 marks]
+
+
+:::{.alert .alert-info}
+
+(a) `Limit` is not clarified with a proper unit, `Rating` is unknown on how it is done by evaluating client's debt-managing ability.
+
+---
+
+(b) Some variables of the data like `Ethnicity` are born features of individuals and should not be used to decide on whether a client's income, education and credit limits and make conclusions on that, which could be very biased.
+
+:::
+
+## Task 4: Data cleaning
+
+It is crucial that data is formatted properly prior to performing analyses.
+There are several variables in the dataset that should be classified as factors.
+Convert the following variables to objects of class `factor`: `Gender`, `Student`, `Married`, `Ethnicity` and save the changes that you've made back into the main data object, `credit`. [2 marks]
+
+:::{.alert .alert-info}
+
+```{r}
+credit %>% 
+  mutate(Gender = as.factor(Gender)) %>% 
+  mutate(Student = as.factor(Student)) %>% 
+  mutate(Married = as.factor(Married)) %>% 
+  mutate(Ethnicity = as.factor(Ethnicity)) -> credit
+```
+
+:::
+
+
+## Task 5: Data exploration
+
+Using only `ggplot2` and in 1 to 2 sentences, answer each of the the following questions based on the patterns that you see, making sure that the plot axes are well-labelled and (for histograms) an appropriate bin width is selected. There is no need to perform any numerical or statistical analyses in your data descriptions.
+
+(a) Discuss the possible relationship between the variables, `Income` and `Ethnicity`. [2 marks]
+(b) Explore the single variable, `Limit` and write one interesting trend in the data. [1 mark]
+(c) Do married customers have higher credit limits compared to single customers? [1 mark]
+
+:::{.alert .alert-info}
+
+(a)
+```{r}
+credit %>%
+  ggplot(aes(x = Ethnicity, y = Income)) +
+  geom_boxplot() +
+  labs(title = "Income based on Ethnitiy") +
+  ylab("Income (Per $10000)") +
+  theme_classic()
+```
+
+There appears to be no significant relationship between ethnicity and income, they tend to earn in the same level though incomes of Asian is a bit low somehow.
+
+---
+
+(b) 
+
+```{r}
+credit %>% 
+  ggplot(aes(Limit)) +
+  geom_histogram(na.rm = T) +
+  ylab("Appearanaces") +
+  labs(title = "Credit Limit Appearances") +
+  theme_classic()
+```
+
+It turns out that most clients have credit limits around \$2500-\$6000, little proportion of the clients made it over 6000 and it is rarely seen that clients have over \$8000 credit limits.
+
+---
+
+(c)
+
+```{r}
+credit %>% 
+  ggplot(aes(x = Married, y = Limit)) +
+  geom_boxplot() +
+  labs(title = "Credit Limits based on marriage status") +
+  ylab("Income (Per $10000)") +
+  theme_classic()
+```
+
+There are some special cases that married clients are ranging higher credit limits comparing to single clients, but generally no, clients have similar average credit limits despite on their marriage status.
+
+:::
+
+
+# Data analyses
+
+## Task 6: Box model
+
+Your supervisor wants to know what proportion of individuals in the bank are married.
+
+(a) From the dataset, calculate the probability that a randomly drawn individual is married. [1 mark]
+(b) Create a box model based on the probability above. Perform 100 draws from the box, with replacement. Calculate the expected value and standard error for the number of individuals who are married, and summarise your findings within context. [5 marks]
+(c) 50 people are selected at random from the customer dataset. What is the chance that 25 individuals who are selected, are married? [2 marks]
+
+:::{.alert .alert-info}
+
+(a)
+
+```{r}
+prob_married <- dim(credit %>% filter(Married == "Yes"))[1] / dim(credit)[1]
+
+prob_married
+```
+
+---
+
+(b)
+
+```{r}
+box <- c(rep(1,61.25), rep(0,100 - 61.25))
+take <- 100
+
+EV <- take*mean(box)
+SE <- multicon::popsd(box)
+
+c(EV, SE)
+```
+ 
+This means per 100 clients we have, 62 would be expected to be married and the fluctuation of this could be 1 person more or less.
+
+---
+
+(c)
+
+```{r}
+dbinom(25,50, prob = prob_married)
+```
+
+:::
+
+
+## Task 7: Linear model
+
+The term "credit limit" is the maximum amount of money a lender will allow a consumer to spend using a credit card, and is recorded as `Limit` in the dataset.
+
+It appears that there may be a linear relationsh ip between `Income` and `Limit`.
+
+(a) Visualise the relationship between the two variables using `ggplot2`, applying a best fit line if necessary. Use `Income` on the x-axis and `Limit` on the y-axis. [2 marks]
+(b) Determine the correlation between the two variables without performing linear modelling. Interpret the results. [2 marks]
+(c) Determine if there is evidence of a relationship between `Income` and `Limit` by performing a statistical test with linear modelling, making sure that you fully articulate your hypotheses, test your assumptions, and present your results with the test statistic, p-value and conclusion. [8 marks]
+
+
+:::{.alert .alert-info}
+
+(a)
+
+```{r}
+credit %>% 
+  ggplot(aes(x = Income, y = Limit)) +
+  geom_point() +
+  geom_smooth(method = "lm",
+              fill = "red",
+              mapping = aes(colour = "Linear"),
+              alpha = .1) +
+  geom_smooth(fill = "blue",
+              mapping = aes(colour = "LOESS"),
+              alpha = .1) +
+  scale_color_manual(
+    name = "", values = c("red","blue")
+  ) +
+  theme_classic() +
+  theme(legend.position = "right") +
+  labs(
+    title = "Limit v.s. Income",
+    x = "Income (Per $10000)",
+    y = "Limit ($)"
+  )
+```
+
+---
+
+(b)
+
+```{r}
+fit <- lm(Limit ~ Income, data = credit)
+fit
+```
+
+For every \$10000 increased income, our client would receive additional \$2389.869 credit limits on their credit card.
+
+--- 
+
+(c)
+
+Hypothesis:
+
+- $H_0$: There is no linear relationship between `Income` and `Limit`.
+
+- $H_1$: There is a linear realtionship between `Income` and `limit`.
+
+Assumption:
+
+```{r}
+autoplot(fit, which = 1:2)
+```
+
+- Homoskedasticity is fine since equal variances are acceptable.
+
+- Normality is just not there since the left and right tail does not even bother to stick on the QQ-line.
+
+But the middle section is convincing, so if ignored the basis on normality:
+
+```{r}
+summary(fit)
+```
+
+Here we can find that the P-value is way smaller than 0.05 with R-squared at 0.62, which means we can fully reject the null hypothesis and determine that there is a linear relationship.
+
+
+:::
+
+# Data interpretation
+
+Andy believes that there may be ethnic and gender-related patterns in the data.
+He has performed a preliminary set of exploratory analyses using base R code:
+
+```{r, eval=FALSE}
+# Summary 1: graphical summary of balance, by gender -------------------------
+## first, summarise data to obtain total balance by gender:
+balance_gender <- tapply(
+  X = credit$Balance, 
+  INDEX = credit$Gender, 
+  FUN = sum)
+# then, plot:
+barplot(balance_gender, 
+  main = "Total Balance ($) by Gender",
+  xlab = "Gender",
+  ylab = "Balance ($)",
+  col = "steelblue")
+
+
+# Summary 2: graphical summary of income, by ethnicity -----------------------
+boxplot(Income ~ Ethnicity, 
+  credit,
+  main = "Income per $10,000 ", # title
+  xlab = "Ethnicity",
+  ylab = "Income (in $10,000)",
+  col = "firebrick")
+
+
+# Summary 3: calculate the total income, by ethnicity ------------------------
+aggregate(credit$Income, 
+  by = list(credit$Ethnicity), 
+  FUN = sum)
+
+
+# Summary 4: filter the data to view the 50 lowest income individuals --------
+mylist <- head(credit[order(credit$Income), ], 50)
+# then, count how many of each gender there are:
+aggregate(mylist$Gender,
+  by = list(mylist$Gender),
+  FUN = NROW)
+```
+
+## Task 8: Data wrangling
+
+It is sometimes necessary to reproduce analyses that have already been done.
+For this task, reproduce the outputs of the data summaries above using concepts that you have learned from data wrangling using data pipelines (`%>%`) and `dplyr` functions. For plots, you should also reproduce axis labels (e.g. `"Gender"`) and colour choices (e.g. `"steelblue"`).
+
+Fortunately, the code has been documented appropriately and you may also run the code above to preview the intended outputs. 
+
+**Use these outputs, and the code comments, to guide you in this Task. If necessary, you may reproduce the outputs using multiple pipelines (see example summary below).**
+
+The functions that you may use include, but are not restricted to
+
+-   `select()`
+-   `group_by()`
+-   `summarise()`
+-   `mutate()`
+-   `ggplot()` and associated layers
+
+As an example, Summary 1 has been re-written for you.
+Complete the remaining summaries 2 to 4. [10 marks]
+
+Summary 1 (example). Set `eval=TRUE` to preview result.
+```{r eval=FALSE}
+# Summary 1: graphical summary of balance, by gender -------------------------
+# prepare the data data
+credit %>%
+  select(Gender, Balance) %>% # select data that we want
+  group_by(Gender) %>% 
+  summarise(average_balance = mean(Balance)) %>%
+# then, plot
+ggplot(aes(Gender, average_balance)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  ggtitle("Average Balance ($) by Gender") +
+  xlab("Gender") +
+  ylab("Balance ($)")
+```
+
+:::{.alert .alert-info}
+<!-- Answer -->
+
+Summary 2:
+```{r}
+# Summary 2: graphical summary of income, by ethnicity -----------------------
+credit %>% 
+  ggplot(aes(x = Ethnicity, y = Income)) +
+  geom_boxplot(fill = "firebrick") +
+  labs(tittle = "Income per $10,000") +
+  xlab("Ethnicity") +
+  ylab("Income (in $10,000)") +
+  stat_boxplot(geom = "errorbar", width = 0.3)
+```
+
+Summary 3:
+```{r}
+# Summary 3: calculate the total income, by ethnicity ------------------------
+credit %>% 
+  group_by(Ethnicity) %>% 
+  summarise(sumIncome = sum(Income))
+```
+
+Summary 4:
+```{r}
+# Summary 4: filter the data to view the 50 lowest income individuals --------
+# then, count how many of each gender there are ------------------------------
+credit %>% 
+  arrange(Income) %>% 
+  head(50) %>% 
+  group_by(Gender) %>% 
+  count()
+```
+
+:::
+
+## Task 9: Interpreting data
+
+These questions are based on the data summaries above.
+
+(a) From the summary outputs provided, comment on the relationship between `Ethnicity` and `Income`. [1 mark]
+(b) Summary 1 showed that average balance between males and females individuals may be different. 
+    - What statistical test can you use to test whether this difference is significant and not due to chance? (You may describe this technique without evaluating code.) [3 marks]
+(c) In Summary 2, what do the dots above the box and whisker plots represent? [1 mark] (You may describe this technique without evaluating code.)
+
+
+:::{.alert .alert-info}
+
+(a) The income for individual does not differ quite significantly since averagely all ethnicity range in a similar level of income, but the total incomes of Caucasian is literally doubled comparing to other ethnicity, which may be caused by more Caucasian clients in our dataset.
+
+---
+
+
+(b)
+
+In order to find this a Goodness of Fit Chi-squared Test can be really helpful by assuming that the ratio between average balances between males and females is 1:1 and perform the test on it, if the P-value calculated is smaller than the acceptable significant level, then we can consider that the hypothesized ratio is not followed - thus a difference, otherwise we can consider there is none.
+
+---
+
+(c)
+
+The dots means outliers that are not covered in our box range and the whiskers mean the error range of positioning of the box.
+
+
+:::
+
+
+# End {-}
+
+You have reached the end of the exam document.
+Please read the [submission instructions](#submission) once more and ensure that you process this file appropriately before submission.
+
+
+# Reproducibility
+
+**Do not delete the information below.**
+```{r, echo=FALSE}
+Sys.time()
+sessionInfo()
+Sys.info()
+```
